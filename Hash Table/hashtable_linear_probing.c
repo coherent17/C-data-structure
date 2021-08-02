@@ -159,7 +159,7 @@ int main(){
     //delete Walt in the hash_table
     hash_table_delete("Walt");
 
-    //after deleted Walt in Hash_table look him again
+    //after deleted Walt in Hash_table lookup him again
     tmp=hash_table_lookup("Walt");
     if(tmp==NULL || tmp==DELETED_NODE) printf("Not Found!\n");
     else printf("%s is at the address of %p\n",tmp->name,tmp);
