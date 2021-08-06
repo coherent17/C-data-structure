@@ -19,6 +19,7 @@ void printlist(node_t *head){
 node_t *create_new_node(int value){
     node_t *result=malloc(sizeof(node_t));
     result->value=value;
+    //temporary point to NULL, we'll point to the exact address in the main function
     result->next=NULL;
     return result;
 }
