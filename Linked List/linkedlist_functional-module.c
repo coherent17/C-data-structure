@@ -56,6 +56,16 @@ node_t *find_node(node_t *head,int value){
     return NULL;
 }
 
+int how_many_node(node_t *head){
+    node_t *temp=head;
+    int count=0;
+    while(temp!=NULL){
+        count+=1;
+        temp=temp->next;
+    }
+    return count;
+}
+
 //using bubble_sort to sort the linkedlist
 void sort_linkedlist(node_t *head){
     node_t *i,*j;
@@ -68,6 +78,42 @@ void sort_linkedlist(node_t *head){
             }
         }
     }
+}
+
+//want to find the mid point of the linkedlist and return the address
+//using two pointer method: fast move two and slow move one
+node_t *middle_of_the_linkedlist(node_t *head){
+    node_t *slow_pointer=head;
+    node_t *fast_pointer=head->next;
+    //slow, fast
+    while(fast_pointer!=NULL){
+        //fast move one step ahead  slow, ___, fast
+        fast_pointer=fast_pointer->next;
+        //if fast is not the end of the linkedlist:
+        if(fast_pointer!=NULL){
+            //slow move one step
+            slow_pointer=slow_pointer->next;
+            //fast move the second step
+            fast_pointer=fast_pointer->next;
+        }
+    }
+    return slow_pointer;
+}
+
+//using do-while to loop the binary search do it first then check
+node_t *binary_search_node(node_t *head, int number){
+    node_t *left=head;
+    node_t *right=NULL;
+    do{
+        node_t *mid=middle_of_the_linkedlist(head);
+        //if middle element is same as the required number
+        if(mid->value==number) return mid;
+        //middle element is greater than the element
+        else if(mid->value<number) left=mid->next;
+        else right=mid;
+    }while(right==NULL || right!=left);
+    //if not found the value, return NULL
+    return NULL;
 }
 
 int main(){
@@ -89,7 +135,17 @@ int main(){
     delete_node(head, 75);
 
     sort_linkedlist(head);
+
+    int node_count=how_many_node(head);
+    printf("There are %d nodes in linkedlist\n", node_count);
+
     printlist(head);
 
+    temp=middle_of_the_linkedlist(head);
+    printf("the middle elemennt in the linkedlist is: %d\n", temp->value);
+
+    //binary search:
+    temp=binary_search_node(head,19);
+    printf("%d\n", temp->value);
     return 0;
 }
