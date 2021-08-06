@@ -58,14 +58,15 @@ node_t *find_node(node_t *head,int value){
 
 //using bubble_sort to sort the linkedlist
 void sort_linkedlist(node_t *head){
-    node_t *temp=head;
-    while(temp->next!=NULL){
-        if(temp->next->value > temp->value){
-            int exchange_temp=temp->value;
-            temp->value=temp->next->value;
-            temp->next->value=exchange_temp;
+    node_t *i,*j;
+    for(i=head;i->next!=NULL;i=i->next){
+        for(j=i->next;j!=NULL;j=j->next){
+            if(i->value>j->value){
+                int exchange_temp=j->value;
+                j->value=i->value;
+                i->value=exchange_temp;
+            }
         }
-        temp=temp->next;
     }
 }
 
