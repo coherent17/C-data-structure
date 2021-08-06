@@ -5,6 +5,82 @@
 
 ## 連結串列(Linked list):
 
+### Why linked list?
+若現在有一個陣列如下:
+
+| index | 0   | 1   |  2  | 3   | 4   | 5   |  6  |
+|:-----:| --- | --- |:---:| --- | --- | --- |:---:|
+| value | 15  | 28  | 24  | 18  | 3   | 45  | 98  |
+
+若想要在陣列的尾端新增元素是蠻輕鬆簡單的，但是倘若要在$index=4$跟$5$之間插入新的元素，那就變難了，要將原本陣列中$index=5$跟$6$的元素都往後移才能插入，因此這樣效率會變得很差，若資料數有很多筆，那麼將會花很多時間在做這類的copy和paste的動作，因此我們引入連結串列(Linked list)這種資料結構，來解決這個問題。簡略上來說，就是宣告記憶體來存我需要存的變數，並且給予一個指標，指向下一個元素，如此一來，便能輕鬆的插入變數或是更改元素間的順序了!
+
+### 實作想法:
+假設現在有三個數字:1、2、4，分別存在不連續的記憶體位址，但是若要將其變為陣列，他們的記憶體位址將是連續的，因此我們可以先宣告一個$struct$存放元素的數值，及指標。而這個指標是指向將要放在陣列中下一個元素的記憶體位址，如此一來，我們便串接了3個原本各自存放在不同記憶體位址的元素了。假如我現在想要增加一個新的元素3在2與4之間，我只需要將2這個元素的下一個指標指向3這個記憶體位址，再將3這個記憶體指標指向4這個元素的記憶體位址，因此可以省去不少copy和paste動作的時間。
+
+### 建立struct:
+對於每個元素，我們都需要存放它的數值及存放下一個數值的記憶體位址，因此我們需要宣告一個struct如下:
+```c=
+struct node{
+    int value;
+    struct node *next;
+};
+
+//avoid typing struct many times
+typedef struct node node_t;
+```
+
+### 實作串接:
+```c=
+#include <stdio.h>
+#include <stdlib.h>
+
+struct node{
+    int value;
+    struct node *next;
+};
+typedef struct node node_t;
+
+void printlist(node_t *head){
+    node_t *temp=head;
+    while(temp!=NULL){
+        printf("%d - ", temp->value);
+        temp=temp->next;
+    }
+    printf("\n");
+}
+
+int main(){
+    node_t n1, n2, n3;
+    node_t *head; //where the linkedlist start
+
+    n1.value=1;
+    n2.value=2;
+    n3.value=4;
+
+    //link them up: n1 -> n2 -> n3
+    head=&n1;
+    n1.next=&n2;
+    n2.next=&n3;
+    n3.next=NULL; // when to stop
+
+    printlist(head);
+
+    return 0;
+}
+```
+結果: ![](https://i.imgur.com/Ay4xfuw.png)，
+
+### 實作插入:
+假如我們想要在2跟4裡面加入新的節點為3，那要如何做呢?我們可以宣告一個新的節點，而其數值為3，將2號節點指向他，而將自己的節點指向元素4的節點即可。
+```c=
+node_t new;
+new.value=3;
+n2.next=&new;
+new.next=&n3;
+```
+full code:https://github.com/coherent17/C-data-structure/blob/main/Linked%20List/linkedlist_no_malloc.c
+結果: ![](https://i.imgur.com/NjDTKt9.png)
+
 
 ## 雜湊表(Hash table):
 若要在陣列中搜尋該數值所對應的索引，以$linear\ search$的時間複雜度為$O(n)$，若是改用$binary\ search$則可以降至$O(logN)$，但是當$N$很大時，$O(logN)$仍然很可觀，因此可以用空間換取時間的$Hash\ Table$的方法，便可以將時間複雜度降至$O(1)$。
