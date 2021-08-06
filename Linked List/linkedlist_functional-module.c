@@ -56,6 +56,19 @@ node_t *find_node(node_t *head,int value){
     return NULL;
 }
 
+//using bubble_sort to sort the linkedlist
+void sort_linkedlist(node_t *head){
+    node_t *temp=head;
+    while(temp->next!=NULL){
+        if(temp->next->value > temp->value){
+            int exchange_temp=temp->value;
+            temp->value=temp->next->value;
+            temp->next->value=exchange_temp;
+        }
+        temp=temp->next;
+    }
+}
+
 int main(){
     node_t *head=NULL;
     node_t *temp;
@@ -74,6 +87,7 @@ int main(){
     //delete 75 from the linkedlist
     delete_node(head, 75);
 
+    sort_linkedlist(head);
     printlist(head);
 
     return 0;
