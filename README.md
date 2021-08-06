@@ -15,71 +15,396 @@
 若想要在陣列的尾端新增元素是蠻輕鬆簡單的，但是倘若要在$index=4$跟$5$之間插入新的元素，那就變難了，要將原本陣列中$index=5$跟$6$的元素都往後移才能插入，因此這樣效率會變得很差，若資料數有很多筆，那麼將會花很多時間在做這類的copy和paste的動作，因此我們引入連結串列(Linked list)這種資料結構，來解決這個問題。簡略上來說，就是宣告記憶體來存我需要存的變數，並且給予一個指標，指向下一個元素，如此一來，便能輕鬆的插入變數或是更改元素間的順序了!
 
 ### 實作想法:
-假設現在有三個數字:1、2、4，分別存在不連續的記憶體位址，但是若要將其變為陣列，他們的記憶體位址將是連續的，因此我們可以先宣告一個$struct$存放元素的數值，及指標。而這個指標是指向將要放在陣列中下一個元素的記憶體位址，如此一來，我們便串接了3個原本各自存放在不同記憶體位址的元素了。假如我現在想要增加一個新的元素3在2與4之間，我只需要將2這個元素的下一個指標指向3這個記憶體位址，再將3這個記憶體指標指向4這個元素的記憶體位址，因此可以省去不少copy和paste動作的時間。
+假設現在有三個元素要放入陣列:node1、node2、node3，分別存在或許不連續的記憶體位址，但是若要將其變為陣列，他們的記憶體位址將是連續的，因此我們可以先宣告一個$struct$存放元素的數值，及指標。而這個指標是指向將要放在陣列中下一個元素的記憶體位址，如此一來，我們便能夠串接了3個原本各自存放在不同記憶體位址的元素了。假如我現在想要增加一個新的元素node4在node2與node3之間，我只需要將node2這個元素的下一個指標指向node4這個記憶體位址，再將node4這個記憶體指標指向node3這個元素的記憶體位址，因此可以省去不少copy和paste動作的時間。
 
 ### 建立struct:
-對於每個元素，我們都需要存放它的數值及存放下一個數值的記憶體位址，因此我們需要宣告一個struct如下:
+對於每個元素，我們都需要存放它的數值及存放下一個數值的記憶體位址，因此對於每一個節點，我們需要宣告一個struct如下:
 ```c=
-struct node{
+struct nodes{
     int value;
-    struct node *next;
+    struct nodes *next;
 };
-
 //avoid typing struct many times
-typedef struct node node_t;
+typedef struct nodes node;
 ```
 
 ### 實作串接:
+為了知道這串linkedlist的起點為何，可以宣告一個指向node這個結構變數的指標為head，如此一來，我們便可以透過head來了解這串linkedlist的起點，而可以將這串linkedlist最後的一個元素中的指標指向NULL，以此判別該linkedlist已經結束。
 ```c=
-#include <stdio.h>
-#include <stdlib.h>
+#include<stdio.h>
 
-struct node{
+struct nodes{
     int value;
-    struct node *next;
+    struct nodes *next;
 };
-typedef struct node node_t;
 
-void printlist(node_t *head){
-    node_t *temp=head;
-    while(temp!=NULL){
-        printf("%d - ", temp->value);
-        temp=temp->next;
-    }
-    printf("\n");
-}
+typedef struct nodes node;
+
+void printList(node *);
 
 int main(){
-    node_t n1, n2, n3;
-    node_t *head; //where the linkedlist start
+    node node1, node2, node3;
+    node *head; //point to the head of the linkedlist
 
-    n1.value=1;
-    n2.value=2;
-    n3.value=4;
+    
+    node1.value=128;
+    node2.value=64;
+    node3.value=45;
 
-    //link them up: n1 -> n2 -> n3
-    head=&n1;
-    n1.next=&n2;
-    n2.next=&n3;
-    n3.next=NULL; // when to stop
+    //link them into the chain: head -> node1 -> node2 -> node3 -> NULL
+    head=&node1;
+    node1.next=&node2;
+    node2.next=&node3;
+    node3.next=NULL;
 
-    printlist(head);
+    //print them out
+    printList(head);
+
+    return 0;
+}
+
+void printList(node *head){
+    node *temp=head;
+    printf("head - ");
+    while(temp!=NULL){
+        printf("%d - ",temp->value);
+        temp=temp->next;
+    }
+    printf("NULL\n");
+}
+```
+結果: ![](https://i.imgur.com/06fxDaC.png)
+
+
+
+### 實作插入:
+假如我們想要在node2跟node3裡面加入新的節點為node_to_insert，那要如何做呢?我們可以宣告一個新的節點，給他數值之後，將node2指向他，而將自己的節點指向node3即可。如下:
+```c=
+    node node_to_insert;
+    node_to_insert.value=17;
+    node2.next=&node_to_insert;
+    node_to_insert.next=&node3;
+```
+結果: ![](https://i.imgur.com/eZliBLv.png)
+
+
+但是事實上，我們在使用linkedlist的時候，可能並不會知道會使用多少節點，因此我們需要將其發展推廣，並寫成函式，以方便後續的使用。
+
+### 模組化功能:
+*    新增節點
+*    從串列的頭部新增節點
+*    尋找節點
+*    在某節點後插入節點
+*    刪除節點
+*    有多少節點
+*    排序節點
+*    陣列存取
+
+---
+#### 新增節點:
+在這個函式中，我想要新增加一個node，並給定他數值，並指定這個節點先暫時指向NULL，待我稍後使用，而最終要回傳這個節點的記憶體位址，以供後續將其插入linkedlist或其他功能使用。
+```c=
+node *create_node(int value){
+    node *temp;
+    temp->value=value;
+    temp->next=NULL;
+    return temp;
+}
+```
+Driven code:
+```c=
+int main(){
+    node *head=NULL; 
+    node *temp;
+
+    temp=create_node(128);
+    head=temp;
+
+    temp=create_node(64);
+    temp->next=head;
+    head=temp;
+
+    temp=create_node(17);
+    temp->next=head;
+    head=temp;
+
+    temp=create_node(45);
+    temp->next=head;
+    head=temp;
+
+    //print them out
+    printList(head);
 
     return 0;
 }
 ```
-結果: ![](https://i.imgur.com/Ay4xfuw.png)，
+我先新增了一個節點(128)，而後將head指向他的位址，因此目前為head - 128，而後我再新增了一個節點(64)，而後我將64的這個節點指向128，再將head指向64的位址，因此串列變為head - 64 - 128，以此類推， 因此較晚進來這個陣列的元素，會被排在比較靠近head的地方。因此輸出如下:  
+![](https://i.imgur.com/gGVLWAk.png)
 
-### 實作插入:
-假如我們想要在2跟4裡面加入新的節點為3，那要如何做呢?我們可以宣告一個新的節點，而其數值為3，將2號節點指向他，而將自己的節點指向元素4的節點即可。
+透過上面的程式碼，可以看到一直在做重複的事情:(新增元素，然後將其指向前一個元素，而後更新head)，我們將其寫為一個函式:
+
+---
+#### 從串列的頭部新增節點:
+在這個函式中，要做到的事為將新的節點接上舊的head，而後更新節點。因此我們需要舊的head和要插入的節點。而後將新的head回傳。
 ```c=
-node_t new;
-new.value=3;
-n2.next=&new;
-new.next=&n3;
+node *insert_at_head(node *head, node* node_to_insert){
+    node_to_insert->next=head;
+    head=node_to_insert;
+    return head;
+}
 ```
-full code:https://github.com/coherent17/C-data-structure/blob/main/Linked%20List/linkedlist_no_malloc.c
-結果: ![](https://i.imgur.com/NjDTKt9.png)
+也可以趁機練習一下指標，用pointer to pointer來更改head指向的位址，便不用回傳head了。
+```c=
+void *insert_at_head(node **head, node* node_to_insert){
+    node_to_insert->next=*head;
+    *head=node_to_insert;
+}
+```
+Driven code:
+```c=
+int main(){
+    node *head=NULL; 
+    node *temp;
+
+    for(int i=0;i<20;i++){
+        temp=create_node(i);
+        insert_at_head(&head, temp);
+    }
+
+    //print them out
+    printList(head);
+
+    return 0;
+}
+```
+結果:![](https://i.imgur.com/a4ZrHX7.png)
+
+---
+#### 尋找節點:
+在這個函式中，我們想要查詢該串列是否有特定元素在裡面，所以就照著指標走訪各個元素。
+```c=
+node *find_node(node *head, int value){
+    node *temp=head;
+    while(temp!=NULL){
+        if(temp->value==value){
+            printf("Found %d at %p\n", temp->value, &temp->value);
+            return temp;
+        }
+        temp=temp->next;
+    }
+    //if the element can't be found in the linkedlist
+    printf("Not found %d in the linkedlist\n", value);
+    return NULL;
+}
+```
+Driven code:
+```c=
+int main(){
+    node *head=NULL; 
+    node *temp;
+
+    for(int i=0;i<20;i++){
+        temp=create_node(i);
+        insert_at_head(&head, temp);
+    }
+
+    //print them out
+    printList(head);
+
+    //find the element in the node:
+    find_node(head, 13);
+    find_node(head, 20);
+
+    return 0;
+}
+```
+結果:![](https://i.imgur.com/9pLEvQt.png)
+
+---
+#### 在某節點後插入節點:
+在這個函式中，需要在該串列中指定的元素(node_to_insert_after)後面插入新的節點(new_node)，因此我們只要將新的節點(new_node)指向(node_to_insert_after)原本指向的節點，再將(node_to_insert_after)指向的節點改為(new_node)即可。
+```c=
+void insert_after_node(node *node_to_insert_after, int new_node_value){
+    node *new_node=create_node(new_node_value);
+    new_node->next=node_to_insert_after->next;
+    node_to_insert_after->next=new_node;
+}
+```
+Driven code:
+```c=
+int main(){
+    node *head=NULL; 
+    node *temp;
+
+    for(int i=0;i<20;i++){
+        temp=create_node(i);
+        insert_at_head(&head, temp);
+    }
+
+    //insert 26 after 17
+    insert_after_node(find_node(head,17),26);
+
+    //print them out
+    printList(head);
+    return 0;
+}
+```
+結果:![](https://i.imgur.com/paiNFQW.png)
+
+---
+#### 刪除節點:
+找到欲刪除節點的前一個節點，將其跳過想要刪掉的那個節點，直接跳過他，指向下一個元素即可。
+```c=
+void delete_node(node *head, int value){
+    node *temp=head;
+    while(temp->next!=NULL){
+        if(temp->next->value==value){
+            temp->next=temp->next->next;
+        }
+        temp=temp->next;
+    }
+}
+```
+Driven code:
+```c=
+int main(){
+    node *head=NULL; 
+    node *temp;
+
+    for(int i=0;i<20;i++){
+        temp=create_node(i);
+        insert_at_head(&head, temp);
+    }
+
+    printf("Before:\n");
+    printList(head);
+
+    //delete 6
+    delete_node(head, 6);
+
+    //print them out
+    printf("After:\n");
+    printList(head);
+    return 0;
+}
+```
+結果:
+![](https://i.imgur.com/VTGl6gt.png)
+
+---
+#### 有多少節點:
+按照指標循序計算，便可得知有多少個節點。
+```c=
+int number_of_node(node *head){
+    node *temp=head;
+    int count=0;
+    while(temp!=NULL){
+        count+=1;
+        temp=temp->next;
+    }
+    return count;
+}
+```
+Driven code:
+```c=
+int main(){
+    node *head=NULL; 
+    node *temp;
+
+    for(int i=0;i<20;i++){
+        temp=create_node(i);
+        insert_at_head(&head, temp);
+    }
+
+    printList(head);
+    
+    printf("There are %d nodes in the linkedlist\n", number_of_node(head));
+    return 0;
+}
+```
+結果![](https://i.imgur.com/dR2baH2.png)
+
+---
+#### 排序節點:
+使用最簡單的[bubblesort](https://hackmd.io/@VSCwqJYJSXeRPkfDpYnbnQ/Sy79MIyju#%E6%B0%A3%E6%B3%A1%E6%8E%92%E5%BA%8F%E6%B3%95Bubble-Sort)來進行，依序拜訪，若排序較後面的元素較小，則與前面交換。
+```c=
+void sortList(node *head){
+    node *i, *j;
+    for(i=head;i->next!=NULL;i=i->next){
+        for(j=i->next;j!=NULL;j=j->next){
+            if(i->value > j->value){
+                int exchange_temp=j->value;
+                j->value=i->value;
+                i->value=exchange_temp;
+            }
+        }
+    }
+}
+```
+Driven code:
+```c=
+int main(){
+    node *head=NULL; 
+    node *temp;
+
+    for(int i=0;i<20;i++){
+        temp=create_node(i);
+        insert_at_head(&head, temp);
+    }
+
+    printf("Before\n");
+    printList(head);
+
+    sortList(head);
+    printf("After sorting:\n");
+    printList(head);
+    return 0;
+}
+```
+結果:![](https://i.imgur.com/8NUMtyy.png)
+
+---
+#### 陣列存取:
+malloc一段連續記憶體空間，將其存為陣列輸出，並且直接透過指標傳回在main()中，陣列的長度。
+```c=
+int *list_to_array(node *head, int *returnSize){
+    node *temp=head;
+    int *array=malloc(sizeof(node)*number_of_node(head));
+    *returnSize=0;
+    while(temp!=NULL){
+        array[*returnSize]=temp->value;
+        *returnSize+=1;
+        temp=temp->next;
+    }
+    return array;
+}
+```
+Driven code:
+```c=
+int main(){
+    node *head=NULL; 
+    node *temp;
+
+    for(int i=0;i<20;i++){
+        temp=create_node(i);
+        insert_at_head(&head, temp);
+    }
+
+    printList(head);
+    int length;
+    int *array=list_to_array(head, &length);
+
+    printf("Array:\n");
+    for(int i=0;i<length;i++){
+        printf("%d ", array[i]);
+    }
+
+    return 0;
+}
+```
+結果:![](https://i.imgur.com/q3Vo38u.png)
+whole C code:  
+https://github.com/coherent17/C-data-structure/blob/main/Linked%20List/linkedlist_functional_optimal.c
 
 
 ## 雜湊表(Hash table):
