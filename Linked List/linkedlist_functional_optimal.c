@@ -18,6 +18,7 @@ void delete_node(node *, int);
 int number_of_node(node *);
 void sortList(node *);
 int *list_to_array(node *, int *);
+node *middleNode(node *);
 
 int main(){
     node *head=NULL; //point to the head of the linkedlist
@@ -57,6 +58,7 @@ int main(){
         printf("%d ", array[i]);
     }
     printf("\n");
+    printf("The middle node of the linkedlist is %d\n", middleNode(head)->value);
 
     return 0;
 }
@@ -146,4 +148,21 @@ int *list_to_array(node *head, int *returnSize){
         temp=temp->next;
     }
     return array;
+}
+
+//two pointers
+node *middleNode(node *head){
+    node *slow_pointer=head;
+    node *fast_pointer=head->next;
+    while(fast_pointer!=NULL){
+        //fast pointer move one step
+        fast_pointer=fast_pointer->next;
+        if(fast_pointer!=NULL){
+            //slow pointer move one step
+            slow_pointer=slow_pointer->next;
+            //fast pointer move second step
+            fast_pointer=fast_pointer->next;
+        }
+    }
+    return slow_pointer;
 }
