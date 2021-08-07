@@ -11,7 +11,8 @@ typedef struct nodes node;
 
 void printList(node *);
 node *create_node(int);
-void *insert_at_head(node **, node *);
+void insert_at_head(node **, node *);
+void insert_at_tail(node *, node *);
 node *find_node(node *, int);
 void insert_after_node(node *, int);
 void delete_node(node *, int);
@@ -41,6 +42,9 @@ int main(){
     
     //delete 6
     delete_node(head, 6);
+
+    //insert 100 at the end of the linkedlist:
+    insert_at_tail(head, create_node(100));
 
     printf("After\n");
     printList(head);
@@ -80,9 +84,19 @@ node *create_node(int value){
     return temp;
 }
 
-void *insert_at_head(node **head, node* node_to_insert){
+void insert_at_head(node **head, node* node_to_insert){
     node_to_insert->next=*head;
     *head=node_to_insert;
+}
+
+void insert_at_tail(node *head, node *node_to_insert){
+    node *temp=head;
+    while(temp!=NULL){
+        if(temp->next==NULL) break;
+        temp=temp->next;
+    }
+    temp->next=node_to_insert;
+    node_to_insert->next=NULL;
 }
 
 node *find_node(node *head, int value){
