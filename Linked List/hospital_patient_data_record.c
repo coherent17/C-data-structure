@@ -228,6 +228,13 @@ void swap_float(float *a, float *b){
     *b=temp;
 }
 
+void swap_string(char *a, char *b){
+    char *temp;
+    strcpy(temp,a);
+    *a=*b;
+    *b=*temp;
+}
+
 void sort_by_age(person *head){
     if(head==NULL){
         printf("\nPlease enter 1 to create data first!\n\n");
@@ -239,7 +246,7 @@ void sort_by_age(person *head){
         for(j=i->next;j!=NULL;j=j->next){
             if(i->age>j->age){
                 //exchange personal data:
-
+                swap_string(&(i->name),&(j->name));
                 swap_int(&(i->age),&(j->age));
                 swap_float(&(i->height),&(j->height));
                 swap_float(&(i->weight),&(j->weight));
