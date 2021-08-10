@@ -265,7 +265,7 @@ void sort_by_age(person *head){
             }
         }
     }
-    printf("The list has been sorted by age:\n");
+    printf("\nThe list has been sorted by age:\n");
     printList(head);
 }
 
@@ -287,7 +287,7 @@ void sort_by_height(person *head){
             }
         }
     }
-    printf("The list has been sorted by height:\n");
+    printf("\nThe list has been sorted by height:\n");
     printList(head);
 }
 
@@ -309,7 +309,7 @@ void sort_by_weight(person *head){
             }
         }
     }
-    printf("The list has been sorted by height:\n");
+    printf("\nThe list has been sorted by weight:\n");
     printList(head);
 }
 
@@ -337,7 +337,7 @@ void save_txt(person *head){
         count+=1;
     }
     fclose(pfile);
-    printf("save the data to %s successfully!\n",filename);
+    printf("\nSave the data to %s successfully!\n",filename);
 }
 
 
@@ -345,19 +345,19 @@ void menu(){
     printf("*********************************************\n");
     printf("*   personal data linked list practice      *\n");
     printf("*                                           *\n");
-    printf("*    1. create personal data                *\n");
-    printf("*    2. print the datalist                  *\n");
-    printf("*    3. insert the data                     *\n");
-    printf("*    4. delete the data                     *\n");
-    printf("*    5. look up personal data               *\n");
-    printf("*    6. modify the personal data            *\n");
-    printf("*    7. how many people in the list         *\n");
-    printf("*    8. sort by age                         *\n");
-    printf("*    9. sort by height                      *\n");
-    printf("*   10. sort by weight                      *\n");
-    printf("*   11. save the linkedlist as txt file     *\n");
+    printf("*    1. Create personal data                *\n");
+    printf("*    2. Print the datalist                  *\n");
+    printf("*    3. Insert the data                     *\n");
+    printf("*    4. Delete the data                     *\n");
+    printf("*    5. Look up personal data               *\n");
+    printf("*    6. Modify the personal data            *\n");
+    printf("*    7. How many people in the list         *\n");
+    printf("*    8. Sort by age                         *\n");
+    printf("*    9. Sort by height                      *\n");
+    printf("*   10. Sort by weight                      *\n");
+    printf("*   11. Save the linkedlist as txt file     *\n");
     printf("*********************************************\n");
-    printf("Please enter your choice(1~10, Ctrl+z for exit):");
+    printf("Please enter your choice(1~11, Ctrl+z for exit):");
 }
 
 
