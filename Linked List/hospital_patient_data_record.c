@@ -75,13 +75,14 @@ void insert_after_someone(person **head, person *person_to_insert){
             person_to_insert->next=temp->next;
             temp->next=person_to_insert;
             printf("Insert sucessfully!\n");
+            return;
         }
         temp=temp->next;
     }
     printf("Can't found the person named %s\n",name);
 }
 
-void insert_personal_data(){
+void insert_personal_data(person *head){
     if(head==NULL){
         printf("\nPlease enter 1 to create data first!\n\n");
         return;
@@ -93,14 +94,19 @@ void insert_personal_data(){
     printf("1. insert at head\t2. insert at tail\t3.insert after someone\n");
     int option;
     scanf("%d",&option);
-    if(option==1){
-        insert_at_head(&head,temp);
-    }
-    else if(option==2){
-        insert_at_tail(&head,temp);
-    }
-    else{
-        insert_after_someone(&head,temp);
+
+    switch(option){
+        case(1):
+            insert_at_head(&head,temp);
+            break;
+        case(2):
+            insert_at_tail(&head,temp);
+            break;
+        case(3):
+            insert_after_someone(&head,temp);
+            break;
+        default:
+            printf("Not supported!\n");
     }
 }
 
@@ -196,6 +202,54 @@ void printList(person *head){
     printf("\n");
 }
 
+void count_person(person *head){
+    if(head==NULL){
+        printf("\nPlease enter 1 to create data first!\n\n");
+        return;
+    } 
+    int count=0;
+    person *temp=head;
+    while(temp!=NULL){
+        count+=1;
+        temp=temp->next;    
+    }
+    printf("\nThere are %d people in the list\n\n",count);
+}
+
+void swap_int(int *a, int *b){
+    int temp=*a;
+    *a=*b;
+    *b=temp;
+}
+
+void swap_float(float *a, float *b){
+    float temp=*a;
+    *a=*b;
+    *b=temp;
+}
+
+void sort_by_age(person *head){
+    if(head==NULL){
+        printf("\nPlease enter 1 to create data first!\n\n");
+        return;
+    }
+     //bubble sort
+     person *i,*j;
+     for(i=head;i->next!=NULL;i=i->next){
+        for(j=i->next;j!=NULL;j=j->next){
+            if(i->age>j->age){
+                //exchange personal data:
+
+                swap_int(&(i->age),&(j->age));
+                swap_float(&(i->height),&(j->height));
+                swap_float(&(i->weight),&(j->weight));
+            }
+        }
+    }
+    printf("The list has been sorted by age:\n");
+    printList(head);
+}
+
 void menu(){
     printf("********************************************\n");
     printf("        Hospital personal datalist          \n");
@@ -206,37 +260,46 @@ void menu(){
     printf("\t4. delete the data\n");
     printf("\t5. look up personal data\n");
     printf("\t6. modify the personal data\n");
+    printf("\t7. how many people in the list\n");
+    printf("\t8. sort by age\n");
     printf("********************************************\n");
-    printf("Please enter your choice(1~5, Ctrl+z for exit):");
+    printf("Please enter your choice(1~6, Ctrl+z for exit):");
 }
 
 void selection_function(){
     menu();
     int choice;
     while(scanf("%d", &choice)!=EOF){
-        if(choice==1){
-            person *temp=create_person(head);
-            insert_at_tail(&head, temp);
-        }
+        person *temp;
+        switch(choice){
+            case(1):
+                temp=create_person(head);
+                insert_at_tail(&head, temp);
+                break;
+            case(2):
+                printList(head);
+                break;
+            case(3):
+                insert_personal_data(head);
+                break;
+            case(4):
+                delete_person_data(&head);
+                break;
+            case(5):
+                person_lookup(head);
+                break;
+            case(6):
+                modify_person(head);
+                break;
+            case(7):
+                count_person(head);
+                break;
+            case(8):
+                sort_by_age(head);
+                break;
 
-        else if(choice==2){
-            printList(head);
-        }
-
-        else if(choice==3){
-            insert_personal_data();
-        }
-
-        else if(choice==4){
-            delete_person_data(&head);
-        }
-
-        else if(choice==5){
-            person_lookup(head);
-        }
-
-        else if(choice==6){
-            modify_person(head);
+            default:
+                printf("Not supported!\n");
         }
 
         menu();
