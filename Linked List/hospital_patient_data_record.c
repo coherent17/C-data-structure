@@ -192,6 +192,7 @@ void printList(person *head){
     } 
     person *temp=head;
     int count=1;
+    printf("\n");
     while(temp!=NULL){
         printf("Person %d:\n", count);
         printf("----------------\n");
@@ -229,10 +230,21 @@ void swap_float(float *a, float *b){
 }
 
 void swap_string(char *a, char *b){
-    char *temp;
-    strcpy(temp,a);
-    *a=*b;
-    *b=*temp;
+    char temp[15];
+    //initialize the string
+    memset(temp,'\0',sizeof(temp));
+    //copy a to temp
+    for(int i=0;i<strlen(a);i++){
+        temp[i]=a[i];
+    }
+    memset(a,'\0',sizeof(a));
+    for(int i=0;i<strlen(b);i++){
+        a[i]=b[i];
+    }
+    memset(b,'\0',sizeof(b));
+    for(int i=0;i<strlen(temp);i++){
+        b[i]=temp[i];
+    }
 }
 
 void sort_by_age(person *head){
@@ -246,7 +258,7 @@ void sort_by_age(person *head){
         for(j=i->next;j!=NULL;j=j->next){
             if(i->age>j->age){
                 //exchange personal data:
-                swap_string(&(i->name),&(j->name));
+                swap_string((i->name),(j->name));
                 swap_int(&(i->age),&(j->age));
                 swap_float(&(i->height),&(j->height));
                 swap_float(&(i->weight),&(j->weight));
@@ -257,23 +269,99 @@ void sort_by_age(person *head){
     printList(head);
 }
 
-void menu(){
-    printf("********************************************\n");
-    printf("        Hospital personal datalist          \n");
-    printf("                                            \n");
-    printf("\t1. create personal data\n");
-    printf("\t2. print the datalist\n");
-    printf("\t3. insert the data\n");
-    printf("\t4. delete the data\n");
-    printf("\t5. look up personal data\n");
-    printf("\t6. modify the personal data\n");
-    printf("\t7. how many people in the list\n");
-    printf("\t8. sort by age\n");
-    printf("********************************************\n");
-    printf("Please enter your choice(1~6, Ctrl+z for exit):");
+void sort_by_height(person *head){
+    if(head==NULL){
+        printf("\nPlease enter 1 to create data first!\n\n");
+        return;
+    }
+     //bubble sort
+     person *i,*j;
+     for(i=head;i->next!=NULL;i=i->next){
+        for(j=i->next;j!=NULL;j=j->next){
+            if(i->height>j->height){
+                //exchange personal data:
+                swap_string((i->name),(j->name));
+                swap_int(&(i->age),&(j->age));
+                swap_float(&(i->height),&(j->height));
+                swap_float(&(i->weight),&(j->weight));
+            }
+        }
+    }
+    printf("The list has been sorted by height:\n");
+    printList(head);
 }
 
-void selection_function(){
+void sort_by_weight(person *head){
+    if(head==NULL){
+        printf("\nPlease enter 1 to create data first!\n\n");
+        return;
+    }
+     //bubble sort
+     person *i,*j;
+     for(i=head;i->next!=NULL;i=i->next){
+        for(j=i->next;j!=NULL;j=j->next){
+            if(i->weight>j->weight){
+                //exchange personal data:
+                swap_string((i->name),(j->name));
+                swap_int(&(i->age),&(j->age));
+                swap_float(&(i->height),&(j->height));
+                swap_float(&(i->weight),&(j->weight));
+            }
+        }
+    }
+    printf("The list has been sorted by height:\n");
+    printList(head);
+}
+
+void save_txt(person *head){
+    if(head==NULL){
+        printf("\nPlease enter 1 to create data first!\n\n");
+        return;
+    }
+    FILE *pfile;
+    char filename[15];
+    printf("Please enter the output filename + .txt:\n");
+    scanf("%s",filename);
+    pfile=fopen(filename,"w");
+    person *temp=head;
+    int count=1;
+    while(temp!=NULL){
+        fprintf(pfile,"Person %d:\n", count);
+        fprintf(pfile,"----------------\n");
+        fprintf(pfile,"%-8s: %s\n","Name",temp->name);
+        fprintf(pfile,"%-8s: %d\n","Age",temp->age);
+        fprintf(pfile,"%-8s: %.1f\n","Height",temp->height);
+        fprintf(pfile,"%-8s: %.1f\n","Weight",temp->weight);
+        fprintf(pfile,"\n");
+        temp=temp->next;
+        count+=1;
+    }
+    fclose(pfile);
+    printf("save the data to %s successfully!\n",filename);
+}
+
+
+void menu(){
+    printf("*********************************************\n");
+    printf("*        Hospital personal datalist         *\n");
+    printf("*                                           *\n");
+    printf("*    1. create personal data                *\n");
+    printf("*    2. print the datalist                  *\n");
+    printf("*    3. insert the data                     *\n");
+    printf("*    4. delete the data                     *\n");
+    printf("*    5. look up personal data               *\n");
+    printf("*    6. modify the personal data            *\n");
+    printf("*    7. how many people in the list         *\n");
+    printf("*    8. sort by age                         *\n");
+    printf("*    9. sort by height                      *\n");
+    printf("*   10. sort by weight                      *\n");
+    printf("*   11. save the linkedlist as txt file     *\n");
+    printf("*********************************************\n");
+    printf("Please enter your choice(1~10, Ctrl+z for exit):");
+}
+
+
+int main(){
     menu();
     int choice;
     while(scanf("%d", &choice)!=EOF){
@@ -304,16 +392,19 @@ void selection_function(){
             case(8):
                 sort_by_age(head);
                 break;
-
+            case(9):
+                sort_by_height(head);
+                break;
+            case(10):
+                sort_by_weight(head);
+                break;
+            case(11):
+                save_txt(head);
+                break;
             default:
                 printf("Not supported!\n");
         }
-
         menu();
     }
-}
-
-int main(){
-    selection_function();
     return 0;
 }
