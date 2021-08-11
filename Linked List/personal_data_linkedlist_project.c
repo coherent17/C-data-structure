@@ -18,13 +18,13 @@ person *head=NULL;
 person *create_person(){
     //personal data
     person *new_person=malloc(sizeof(person));
-    printf("Please enter the user name\n");
+    printf("Please enter the user name:\n");
     scanf("%s",new_person->name);
-    printf("Please enter the age of the user\n");
+    printf("Please enter the age(integer) of the user:\n");
     scanf("%d",&(new_person->age));
-    printf("Please enter the height of the user\n");
+    printf("Please enter the height(float) of the user:\n");
     scanf("%f",&(new_person->height));
-    printf("Please enter the weight of the user\n");
+    printf("Please enter the weight(float) of the user:\n");
     scanf("%f",&(new_person->weight));
     new_person->next=NULL;
     return new_person;
@@ -121,6 +121,7 @@ void delete_person_data(person **head){
     person *temp=*head;
     //if the delete person is the head person:
     if(strcmp(temp->name,name)==0 && temp==*head){
+        free(temp);
         *head=temp->next;
         printf("Deleted %s in list(head) successfully!\n",name);
         return;
@@ -129,6 +130,7 @@ void delete_person_data(person **head){
     temp=*head;
     while(temp!=NULL){
         if(strcmp(temp->next->name,name)==0){
+            free(temp->next);
             temp->next=temp->next->next;
             printf("Deleted %s in list successfully!\n",name);
             return;
