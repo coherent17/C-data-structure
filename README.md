@@ -483,12 +483,8 @@ whole C code:
 https://github.com/coherent17/C-data-structure/blob/main/Linked%20List/linkedlist_functional_optimal.c
 
 ### 實作project:
-有了上面的這些知識後，我便動手開始自己寫一個project，並且增加各種功能，讓我不僅對串列，更對指標有了更進一步的認識。如下:  
+有了上面的這些知識後，我便動手開始自己寫一個project，並且增加各種功能，讓我不僅對串列，更對指標有了更進一步的認識。那這次的struct就訂得複雜一點，有字串，整數，浮點數，及重要的指標變數以存取下一個元素的位址。如下:
 ```c=
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 struct data{
     char name[15];
     int age;
@@ -496,27 +492,82 @@ struct data{
     float weight;
     struct data *next;
 };
+```
+為了將這這個linkedlist練習得好，我在這個project裡面要做到以下11件事:
+*    1. 可以新增個人的資料(預設插入在尾部)
+*    2. 可以印出所有的linkedlist
+*    3. 能夠插入資料，不管是插在頭、尾，抑或是插在特定的人之後
+*    4. 能夠刪除資料
+*    5. 能夠查看資料
+*    6. 能夠修改已在串列中的資料屬性
+*    7. 能夠計算在linkedlist中有多少人
+*    8. 以年齡排序
+*    9. 以身高排序
+*    10. 以體重排序
+*    11. 將linkedlist匯出成txt檔
 
-typedef struct data person;
+#### menu:
+製作一個使育者介面，告知使用者如何使用這個系統，日後放在EOF的迴圈中，因此以Ctrl+z結束:
+```c=
+void menu(){
+    printf("*********************************************\n");
+    printf("*   personal data linked list practice      *\n");
+    printf("*                                           *\n");
+    printf("*    1. Create personal data                *\n");
+    printf("*    2. Print the datalist                  *\n");
+    printf("*    3. Insert the data                     *\n");
+    printf("*    4. Delete the data                     *\n");
+    printf("*    5. Look up personal data               *\n");
+    printf("*    6. Modify the personal data            *\n");
+    printf("*    7. How many people in the list         *\n");
+    printf("*    8. Sort by age                         *\n");
+    printf("*    9. Sort by height                      *\n");
+    printf("*   10. Sort by weight                      *\n");
+    printf("*   11. Save the linkedlist as txt file     *\n");
+    printf("*********************************************\n");
+    printf("Please enter your choice(1~11, Ctrl+z for exit):");
+}
+```
+執行後看起來格式如右圖:
+![](https://i.imgur.com/8hLVWzo.png)
 
-//global variable
-person *head=NULL;
-
+#### 可以新增個人的資料(預設插入在尾部):
+這邊讓使用者新增人員資料進入串列，並且預設插入在尾部，因此先寫一個函式，讀取該人的資料，並回傳他的位址，再將其插入陣列的尾部即可，那這邊要注意的是，假如是第一次新增這個資料，會需要更動head所指向的位址，因此使用pointer to pointer來更改他的值:
+```c=
 person *create_person(){
     //personal data
     person *new_person=malloc(sizeof(person));
-    printf("Please enter the user name\n");
+    printf("Please enter the user name:\n");
     scanf("%s",new_person->name);
-    printf("Please enter the age of the user\n");
+    printf("Please enter the age(integer) of the user:\n");
     scanf("%d",&(new_person->age));
-    printf("Please enter the height of the user\n");
+    printf("Please enter the height(float) of the user:\n");
     scanf("%f",&(new_person->height));
-    printf("Please enter the weight of the user\n");
+    printf("Please enter the weight(float) of the user:\n");
     scanf("%f",&(new_person->weight));
     new_person->next=NULL;
     return new_person;
 }
 
+void insert_at_tail(person **head, person *person_to_insert){
+    if(*head==NULL){
+        *head=person_to_insert;
+        person_to_insert->next=NULL;
+        return;
+    } 
+    person *temp=*head;
+    while(temp!=NULL){
+        if(temp->next==NULL) break;
+        temp=temp->next;
+    }
+    temp->next=person_to_insert;
+    person_to_insert->next=NULL;
+}
+```
+
+#### 可以印出所有的linkedlist:
+就簡單的從頭到NULL掃一次，並且印出所有人的所有屬性，包括名字，年齡，身高，體重，這邊要注意的點是，假如使用者還未新增任何人進入linkedlist，必須要先告知其使用上面第一步來新增人員資料進入串列。
+```c=
 void print_personal_data(person *temp){
     printf("%-8s: %s\n","Name",temp->name);
     printf("%-8s: %d\n","Age",temp->age);
@@ -525,6 +576,30 @@ void print_personal_data(person *temp){
     printf("\n");
 }
 
+void printList(person *head){
+    if(head==NULL){
+        printf("\nPlease enter 1 to create data first!\n\n");
+        return;
+    } 
+    person *temp=head;
+    int count=1;
+    printf("\n");
+    while(temp!=NULL){
+        printf("Person %d:\n", count);
+        printf("----------------\n");
+        print_personal_data(temp);
+        temp=temp->next;
+        count+=1;
+    }
+    printf("\n");
+}
+```
+執行後看起來如右圖:
+![](https://i.imgur.com/rPM0z3h.png)
+
+#### 能夠插入資料，不管是插在頭、尾，抑或是插在特定的人之後:
+就分別寫三個函式，分別是插在頭、尾，抑或是插在特定的人之後，再用一個函式將其包起來，給使用者決定要使用何種插入法。也要注意，若此linkedlist還是空的，必須先請使用者加入資料，再進行插入。
+```c=
 void insert_at_head(person **head, person *person_to_insert){
     if(*head==NULL){
         *head=person_to_insert;
@@ -596,7 +671,14 @@ void insert_personal_data(person *head){
             printf("Not supported!\n");
     }
 }
+```
 
+#### 能夠刪除資料:
+這個功能讓使用者輸入名字，以刪除在串列中該人的資料，在這個函式中，要注意的重點比較多:  
+*    1. 若為空串列，先請使用者新增資料進入。
+*    2. 若被刪除的人為head所指向的人，那麼head將要指向下一個人，也就是說在這個情況，head的值可能會更改，因使使用pointer to pointer以更改head的值。
+*    3. 因為前面是用malloc要求記憶體空間的，因此刪除後，要使用free()，以釋放該節點的記憶體空間。
+```c=
 void delete_person_data(person **head){
     if(*head==NULL){
         printf("\nPlease enter 1 to create data first!\n\n");
@@ -608,6 +690,7 @@ void delete_person_data(person **head){
     person *temp=*head;
     //if the delete person is the head person:
     if(strcmp(temp->name,name)==0 && temp==*head){
+        free(temp);
         *head=temp->next;
         printf("Deleted %s in list(head) successfully!\n",name);
         return;
@@ -616,6 +699,7 @@ void delete_person_data(person **head){
     temp=*head;
     while(temp!=NULL){
         if(strcmp(temp->next->name,name)==0){
+            free(temp->next);
             temp->next=temp->next->next;
             printf("Deleted %s in list successfully!\n",name);
             return;
@@ -624,7 +708,11 @@ void delete_person_data(person **head){
     }
     printf("Not found %s in the list\n",name);
 }
+```
 
+#### 能夠查看資料:
+能夠用名字去查詢該人的屬性。
+```c=
 void person_lookup(person *head){
     if(head==NULL){
         printf("\nPlease enter 1 to create data first!\n\n");
@@ -643,7 +731,11 @@ void person_lookup(person *head){
     }
     printf("\nNot found %s in the list!\n\n",name);
 }
+```
 
+#### 能夠修改已在串列中的資料屬性:
+透過名字定位到該人，將其所有屬性全部從新讀進一遍，更新屬性的資料。
+```c=
 void modify_person(person *head){
     if(head==NULL){
         printf("\nPlease enter 1 to create data first!\n\n");
@@ -671,25 +763,11 @@ void modify_person(person *head){
     }
     printf("Not found %s in the list\n\n",name);
 }
+```
 
-void printList(person *head){
-    if(head==NULL){
-        printf("\nPlease enter 1 to create data first!\n\n");
-        return;
-    } 
-    person *temp=head;
-    int count=1;
-    printf("\n");
-    while(temp!=NULL){
-        printf("Person %d:\n", count);
-        printf("----------------\n");
-        print_personal_data(temp);
-        temp=temp->next;
-        count+=1;
-    }
-    printf("\n");
-}
-
+#### 能夠計算在linkedlist中有多少人:
+單純從head走到NULL，計算該串列中存放了多少筆的資料:
+```c=
 void count_person(person *head){
     if(head==NULL){
         printf("\nPlease enter 1 to create data first!\n\n");
@@ -703,7 +781,11 @@ void count_person(person *head){
     }
     printf("\nThere are %d people in the list\n\n",count);
 }
+```
 
+#### 以年齡,身高,體重排序:
+先寫三種型態(int, float, char)的交換函式，再使用bubblesort來針對特定得屬性排序
+```c=
 void swap_int(int *a, int *b){
     int temp=*a;
     *a=*b;
@@ -799,7 +881,11 @@ void sort_by_weight(person *head){
     printf("\nThe list has been sorted by weight:\n");
     printList(head);
 }
+```
 
+#### 將linkedlist匯出成txt檔:
+以pointer to file的形式，並用fprintf寫入檔案，將其匯出。
+```c=
 void save_txt(person *head){
     if(head==NULL){
         printf("\nPlease enter 1 to create data first!\n\n");
@@ -826,28 +912,11 @@ void save_txt(person *head){
     fclose(pfile);
     printf("\nSave the data to %s successfully!\n",filename);
 }
+```
 
-
-void menu(){
-    printf("*********************************************\n");
-    printf("*   personal data linked list practice      *\n");
-    printf("*                                           *\n");
-    printf("*    1. Create personal data                *\n");
-    printf("*    2. Print the datalist                  *\n");
-    printf("*    3. Insert the data                     *\n");
-    printf("*    4. Delete the data                     *\n");
-    printf("*    5. Look up personal data               *\n");
-    printf("*    6. Modify the personal data            *\n");
-    printf("*    7. How many people in the list         *\n");
-    printf("*    8. Sort by age                         *\n");
-    printf("*    9. Sort by height                      *\n");
-    printf("*   10. Sort by weight                      *\n");
-    printf("*   11. Save the linkedlist as txt file     *\n");
-    printf("*********************************************\n");
-    printf("Please enter your choice(1~11, Ctrl+z for exit):");
-}
-
-
+#### driven code:
+最後在main中，用switch case使用上面寫好的函式。
+```c=
 int main(){
     menu();
     int choice;
@@ -896,7 +965,7 @@ int main(){
     return 0;
 }
 ```
-code:https://github.com/coherent17/C-data-structure/blob/main/Linked%20List/personal_data_linkedlist_project.c
+完整的程式碼(C code):https://github.com/coherent17/C-data-structure/blob/main/Linked%20List/personal_data_linkedlist_project.c
 
 ## 雜湊表(Hash table):
 若要在陣列中搜尋該數值所對應的索引，以$linear\ search$的時間複雜度為$O(n)$，若是改用$binary\ search$則可以降至$O(logN)$，但是當$N$很大時，$O(logN)$仍然很可觀，因此可以用空間換取時間的$Hash\ Table$的方法，便可以將時間複雜度降至$O(1)$。
