@@ -6,21 +6,21 @@
 #define INT_MIN (-2147483648)
 #define STACK_EMPTY INT_MIN
 
-int mystack[STACK_LENGTH];
+int stack[STACK_LENGTH];
 int top = EMPTY;
 
 bool push(int value){
-    if(top >= STACK_LENGTH-1)return false;
+    if(top >= STACK_LENGTH-1) return false;
 
     top++;
-    mystack[top] = value;
+    stack[top] = value;
     return true;
 }
 
 int pop(){
-    if(top==EMPTY) return STACK_EMPTY;
+    if(top == EMPTY) return STACK_EMPTY;
 
-    int reuslt = mystack[top];
+    int reuslt = stack[top];
     top--;
     return reuslt;
 }
