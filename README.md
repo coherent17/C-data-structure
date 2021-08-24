@@ -1,7 +1,269 @@
 # 資料結構筆記in C
 ---
+*    堆疊(Stack)
+*    佇列(Quene)
 *    連結串列(Linked list)
 *    雜湊表(Hash table)
+
+## 堆疊(Stack):
+堆疊是一種先進後出(FILO)-First In Last Out的資料結構，就像是將書堆在桌上一樣，會越堆越高，要拿取最底下那本書只能將上面的書都先移除，而後才能拿他。針對Stack有兩種作用方式，第一種是push，將元素加入這個堆中，第二種是pop，將元素從堆疊中移除。
+
+### Array版:
+缺點是一開始就要先訂好stack的長度，若要產生一個不知道多長的stack則需要使用linkedlist達成。
+
+#### push():
+為了要知道這個堆疊了多少，因此會使用一個變數$top$來紀錄到底堆了多少。一開始先設定$top=-1$，每當要push元素進入stack的時候，將$top+1$，將其放入$index=top+1$這個位置。
+
+#### pop():
+將最後放入堆疊的元素移出，因此返回$index=top$的元素，而後將$top-1$。
+
+#### C-Array版實作:
+```c=
+#include <stdio.h>
+#include <stdbool.h>
+
+#define STACK_LENGTH 5
+#define EMPTY (-1)
+#define INT_MIN (-2147483648)
+#define STACK_EMPTY INT_MIN
+
+int stack[STACK_LENGTH];
+int top = EMPTY;
+
+bool push(int value){
+    if(top >= STACK_LENGTH-1) return false;
+
+    top++;
+    stack[top] = value;
+    return true;
+}
+
+int pop(){
+    if(top == EMPTY) return STACK_EMPTY;
+
+    int reuslt = stack[top];
+    top--;
+    return reuslt;
+}
+
+int main(){
+    push(56);
+    push(78);
+    push(13);
+
+    int t;
+    while((t=pop())!=STACK_EMPTY){
+        printf("t = %d\n", t);
+    }
+    return 0;
+}
+```
+C code:https://github.com/coherent17/C-data-structure/blob/main/Stack/stack_array.c
+
+編譯執行後可以發現這個stack pop出來的順序真的是FILO，輸出為: ![](https://i.imgur.com/EAe7YB2.png)
+
+### Linkedlist版:
+若是使用linkedlist來實作stack的話，對於每個元素的節點都需要去存放比該元素前一個放入的元素的記憶體位址，而head則是要持續更新為新加入節點的記憶體位址。
+
+#### push():
+在做push的時候需要先宣告一個記憶體空間，而後更新head的位址。更新方法如下:  
+*    一開始head = NULL
+*    將newnode1->next = head = NULL
+*    將head更新為newnode1
+  
+所以linkedlist變為 head - newnode1 - NULL   
+再push一個:  
+*    head = newnode1
+*    newnode2->next = head = newnode1
+*    將head更新為newnode2
+
+所以linkedlist變為 head - newnode2 - newnode1 - NULL   
+
+可以特別注意到最早進來的newnode1是被放在較靠近NULL的一端，而較晚進來的newnode2的記憶體位址則是被head所存。
+
+#### pop():
+因為head是存放最晚進來的node，因此在pop的時候就直接將其數值返還，而後將head改為該節點原本所指向的記憶體位址即可。
+
+#### C-Linkedlist版實作:
+```c=
+#include <stdio.h>
+#include <stdbool.h>
+#include <stdlib.h>
+
+#define EMPTY (-1)
+#define INT_MIN (-2147483648)
+#define STACK_EMPTY INT_MIN
+
+typedef struct node{
+    int value;
+    struct node *next;
+} node;
+
+node *head = NULL;
+
+bool push(int value){
+    node *newnode = malloc(sizeof(node));
+    newnode->value = value;
+    newnode->next = head;
+    head = newnode;
+    return true;
+}
+
+int pop(){
+    if(head==NULL)
+        return STACK_EMPTY;
+
+    int result = head->value;
+    node *temp = head;
+    head = head->next;
+    free(temp);
+    return result;
+}
+
+int main(){
+    push(56);
+    push(78);
+    push(13);
+
+    int t;
+    while((t=pop())!=STACK_EMPTY){
+        printf("t = %d\n", t);
+    }
+    return 0;
+}
+```
+C code:https://github.com/coherent17/C-data-structure/blob/main/Stack/stack_linkedlist.c
+
+### 優化改良版:
+由上面的兩隻程式皆可以發現都push及pop的功能僅限於全域的array或是linkedlist，若有多個stack，應該要多出能夠指定針對哪一個stack進行push或是pop的功能，因此需要再多傳一些參數進入push及pop的function內部，使其可以更好的針對"特定的"stack進行動作。
+
+#### Array 優化改良版:
+目標是要能夠針對特定的stack進行push與pop，因此建立一個struct，內部包含陣列及$top$這個變數，而後透過指標將stack這個struct的位址傳入function，便能夠執行針對特定的stack進型push及pop的動作了!
+
+##### C-Array optimal版實作:
+```c=
+#include <stdio.h>
+#include <stdbool.h>
+
+#define STACK_LENGTH 5
+#define EMPTY (-1)
+#define INT_MIN (-2147483648)
+#define STACK_EMPTY INT_MIN
+
+typedef struct stack{
+    int value[STACK_LENGTH];
+    //initialize each top of the each stack in main
+    int top;
+}stack;
+
+bool push(stack *mystack, int value){
+    if(mystack->top >= STACK_LENGTH-1) return false;
+
+    mystack->top++;
+    mystack->value[mystack->top] = value;
+    return true;
+}
+
+int pop(stack *mystack){
+    if(mystack->top == EMPTY) return STACK_EMPTY;
+
+    int reuslt = mystack->value[mystack->top];
+    mystack->top--;
+    return reuslt;
+}
+
+int main(){
+
+    stack stack1, stack2, stack3;
+    stack1.top = EMPTY;
+    stack2.top = EMPTY;
+    stack3.top = EMPTY;
+
+    push(&stack1, 56);
+    push(&stack1, 78);
+    push(&stack1, 13);
+
+    push(&stack2, 25);
+    push(&stack2, 75);
+    push(&stack2, 69);
+
+    push(&stack3, 43);
+    push(&stack3, 29);
+    push(&stack3, 46);
+
+    int t;
+    while((t=pop(&stack2))!=STACK_EMPTY){
+        printf("t = %d\n", t);
+    }
+    return 0;
+}
+```
+C code:https://github.com/coherent17/C-data-structure/blob/main/Stack/stack_array_optimal.c
+
+#### Linkedlist 優化改良版:
+目標是要在push或是pop的時候能夠更特定的指定是要push或pop到哪一個stack上，因此我們可以多傳入存放stack位址head的記憶體位址，我們可以透過指標的指標將欲指定stack的head的記憶體位址傳入function，而後透過$"*"$去dereference這個指標的指標，去更改head實際上存取節點位址。
+
+##### C-Linkedlist optimal版實作:
+```c=
+#include <stdio.h>
+#include <stdbool.h>
+#include <stdlib.h>
+
+#define EMPTY (-1)
+#define INT_MIN (-2147483648)
+#define STACK_EMPTY INT_MIN
+
+typedef struct node{
+    int value;
+    struct node *next;
+} node;
+
+
+bool push(node **head, int value){
+    node *newnode = malloc(sizeof(node));
+    newnode->value = value;
+    newnode->next = (*head);
+    (*head) = newnode;
+    return true;
+}
+
+int pop(node **head){
+    if((*head) == NULL)
+        return STACK_EMPTY;
+
+    int result = (*head)->value;
+    node *temp = (*head);
+    (*head) = (*head)->next;
+    free(temp);
+    return result;
+}
+
+int main(){
+
+    node *head1 = NULL;
+    node *head2 = NULL;
+    node *head3 = NULL;
+
+    push(&head1, 56);
+    push(&head1, 13);
+    push(&head1, 12);
+
+    push(&head2, 17);
+    push(&head2, 19);
+    push(&head2, 28);
+
+    push(&head3, 26);
+    push(&head3, 24);
+    push(&head3, 32);
+
+    int t;
+    while((t=pop(&head2))!=STACK_EMPTY){
+        printf("t = %d\n", t);
+    }
+    return 0;
+}
+```
+C code:https://github.com/coherent17/C-data-structure/blob/main/Stack/stack_linkedlist_optimal.c
 
 ## 連結串列(Linked list):
 
