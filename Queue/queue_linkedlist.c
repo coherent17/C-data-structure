@@ -25,7 +25,8 @@ bool enqueue(int value){
         tail = newnode;
     }
 
-    if(tail!=NULL){
+    //add the seoond or third node into the queue
+    else{
         tail->next = newnode;
         tail = newnode;
     }
