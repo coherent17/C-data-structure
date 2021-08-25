@@ -12,19 +12,19 @@ typedef struct stack{
     int top;
 }stack;
 
-bool push(stack *mystack, int value){
-    if(mystack->top >= STACK_LENGTH-1) return false;
+bool push(stack *s, int value){
+    if(s->top >= STACK_LENGTH-1) return false;
 
-    mystack->top++;
-    mystack->value[mystack->top] = value;
+    s->top++;
+    s->value[s->top] = value;
     return true;
 }
 
-int pop(stack *mystack){
-    if(mystack->top == EMPTY) return STACK_EMPTY;
+int pop(stack *s){
+    if(s->top == EMPTY) return STACK_EMPTY;
 
-    int reuslt = mystack->value[mystack->top];
-    mystack->top--;
+    int reuslt = s->value[s->top];
+    s->top--;
     return reuslt;
 }
 
