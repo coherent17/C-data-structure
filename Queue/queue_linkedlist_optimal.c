@@ -33,7 +33,7 @@ bool enqueue(queue *q, int value){
         q->tail = newnode;
     }
 
-    if(q->tail!=NULL){
+    else{
         q->tail->next = newnode;
         q->tail = newnode;
     }
