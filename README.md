@@ -1,9 +1,12 @@
 # 資料結構筆記in C
 ---
 *    堆疊(Stack)
-*    佇列(Quene)
+*    佇列(Queue)
 *    連結串列(Linked list)
 *    雜湊表(Hash table)
+
+**目錄:**
+[TOC]
 
 ## 堆疊(Stack):
 堆疊是一種先進後出(FILO)-First In Last Out的資料結構，就像是將書堆在桌上一樣，會越堆越高，要拿取最底下那本書只能將上面的書都先移除，而後才能拿他。針對Stack有兩種作用方式，第一種是push，將元素加入這個堆中，第二種是pop，將元素從堆疊中移除。
@@ -15,9 +18,9 @@
 為了要知道這個堆疊了多少，因此會使用一個變數$top$來紀錄到底堆了多少。一開始先設定$top=-1$，每當要push元素進入stack的時候，將$top+1$，將其放入$index=top+1$這個位置。
 
 #### pop():
-將最後放入堆疊的元素移出，因此返回$index=top$的元素，而後將$top-1$。
+將最後放入堆疊的元素移出，因此返回$index=top$的元素，而後將$top-1$。那我們要如何知道已經pop到底了呢?設定一個在stack中不會用到的數字(ex:-2147283648)，當$top$已經見底$(top=-1)$的時候，將其回傳以表示stack已經被pop到底了。
 
-#### C-Array版實作:
+#### Array版實作:
 ```c=
 #include <stdio.h>
 #include <stdbool.h>
@@ -58,7 +61,7 @@ int main(){
     return 0;
 }
 ```
-C code:https://github.com/coherent17/C-data-structure/blob/main/Stack/stack_array.c
+code:https://github.com/coherent17/C-data-structure/blob/main/Stack/stack_array.c
 
 編譯執行後可以發現這個stack pop出來的順序真的是FILO，輸出為: ![](https://i.imgur.com/EAe7YB2.png)
 
@@ -67,7 +70,7 @@ C code:https://github.com/coherent17/C-data-structure/blob/main/Stack/stack_arra
 
 #### push():
 在做push的時候需要先宣告一個記憶體空間，而後更新head的位址。更新方法如下:  
-*    一開始head = NULL
+*    一開始初始化head = NULL
 *    將newnode1->next = head = NULL
 *    將head更新為newnode1
   
@@ -82,9 +85,9 @@ C code:https://github.com/coherent17/C-data-structure/blob/main/Stack/stack_arra
 可以特別注意到最早進來的newnode1是被放在較靠近NULL的一端，而較晚進來的newnode2的記憶體位址則是被head所存。
 
 #### pop():
-因為head是存放最晚進來的node，因此在pop的時候就直接將其數值返還，而後將head改為該節點原本所指向的記憶體位址即可。
+因為head是存放最晚進來的node的位址，因此在pop的時候就直接將其位址指向的數值返還，而後將head改為該節點原本所指向的記憶體位址即可。
 
-#### C-Linkedlist版實作:
+#### Linkedlist版實作:
 ```c=
 #include <stdio.h>
 #include <stdbool.h>
@@ -132,7 +135,7 @@ int main(){
     return 0;
 }
 ```
-C code:https://github.com/coherent17/C-data-structure/blob/main/Stack/stack_linkedlist.c
+code:https://github.com/coherent17/C-data-structure/blob/main/Stack/stack_linkedlist.c
 
 ### 優化改良版:
 由上面的兩隻程式皆可以發現都push及pop的功能僅限於全域的array或是linkedlist，若有多個stack，應該要多出能夠指定針對哪一個stack進行push或是pop的功能，因此需要再多傳一些參數進入push及pop的function內部，使其可以更好的針對"特定的"stack進行動作。
@@ -140,7 +143,7 @@ C code:https://github.com/coherent17/C-data-structure/blob/main/Stack/stack_link
 #### Array 優化改良版:
 目標是要能夠針對特定的stack進行push與pop，因此建立一個struct，內部包含陣列及$top$這個變數，而後透過指標將stack這個struct的位址傳入function，便能夠執行針對特定的stack進型push及pop的動作了!
 
-##### C-Array optimal版實作:
+##### Array optimal版實作:
 ```c=
 #include <stdio.h>
 #include <stdbool.h>
@@ -156,19 +159,19 @@ typedef struct stack{
     int top;
 }stack;
 
-bool push(stack *mystack, int value){
-    if(mystack->top >= STACK_LENGTH-1) return false;
+bool push(stack *s, int value){
+    if(s->top >= STACK_LENGTH-1) return false;
 
-    mystack->top++;
-    mystack->value[mystack->top] = value;
+    s->top++;
+    s->value[s->top] = value;
     return true;
 }
 
-int pop(stack *mystack){
-    if(mystack->top == EMPTY) return STACK_EMPTY;
+int pop(stack *s){
+    if(s->top == EMPTY) return STACK_EMPTY;
 
-    int reuslt = mystack->value[mystack->top];
-    mystack->top--;
+    int reuslt = s->value[s->top];
+    s->top--;
     return reuslt;
 }
 
@@ -198,12 +201,12 @@ int main(){
     return 0;
 }
 ```
-C code:https://github.com/coherent17/C-data-structure/blob/main/Stack/stack_array_optimal.c
+code:https://github.com/coherent17/C-data-structure/blob/main/Stack/stack_array_optimal.c
 
 #### Linkedlist 優化改良版:
 目標是要在push或是pop的時候能夠更特定的指定是要push或pop到哪一個stack上，因此我們可以多傳入存放stack位址head的記憶體位址，我們可以透過指標的指標將欲指定stack的head的記憶體位址傳入function，而後透過$"*"$去dereference這個指標的指標，去更改head實際上存取節點位址。
 
-##### C-Linkedlist optimal版實作:
+##### Linkedlist optimal版實作:
 ```c=
 #include <stdio.h>
 #include <stdbool.h>
@@ -263,7 +266,380 @@ int main(){
     return 0;
 }
 ```
-C code:https://github.com/coherent17/C-data-structure/blob/main/Stack/stack_linkedlist_optimal.c
+code:https://github.com/coherent17/C-data-structure/blob/main/Stack/stack_linkedlist_optimal.c
+
+## 佇列(Queue):
+佇列是一種先進先出(FIFO)-First In First Out的資料結構。針對這種資料結構，可以進行兩種行為:在queue中增加元素稱為enqueue，而在queue中取出元素則稱為dequeue。此外，先enqueue進queue中的元素，會先被dequeue出來。
+
+### Array版:
+缺點是一開始就要先訂好queue的長度，若要產生一個不知道多長的queue則需要使用linkedlist達成。
+
+#### enqueue():
+為了要知道這個佇列存了多少東西，使用head與tail來持續追蹤。具體實踐如下:  
+*    先將head與tail都初始化為-1
+*    當enqueue第一個新元素進入queue之後，將其放入$index=tail+1$的位置
+*    之後再enqueue新的元素也比照辦理，因此$tail+1$便是佇列中的元素個數
+
+實作想法:
+*    初始化head=-1, tail=-1
+*    enqueue(3):  
+        *  tail=0, array[tail]=3
+    
+        | index | -1/head | 0/tail |  1  | 2   |
+        | ----- |:-------:|:------:|:---:| --- |
+        | value |    X    |   3    |     |     |
+        
+*    enqueue(1):  
+        *    tail=1, array[tail]=1
+        
+        | index | -1/head |  0  | 1/tail | 2   |
+        | ----- |:-------:|:---:|:------:| --- |
+        | value |    X    |  3  |   1    |     |
+        
+*    enqueue(4):  
+        *    tail=2, array[tail]=4
+        
+        | index | -1/head |  0  |  1  | 2/tail |
+        | ----- |:-------:|:---:|:---:|:------:|
+        | value |    X    |  3  |  1  |   4    |
+
+#### dequeue():
+將最早放入佇列的元素移出，因此返回$index=head+1$的元素，而後將所有後面進來的元素都往前移一格。那我們要如何知道已經dequeue到底了呢?設定一個在queue中不會用到的數字(ex:-2147283648)，如果tail為-1，則回傳該數字，以表示這個佇列已經是空的了。
+
+實作想法:
+*    先進行enqueue(3), enqueue(1), enqueue(4)後，陣列為:  
+        *    tail=2
+        
+        | index | -1/head |  0  |  1  | 2/tail |
+        | ----- |:-------:|:---:|:---:|:------:|
+        | value |    X    |  3  |  1  |   4    |
+        
+*    dequeue():
+        *    回傳$index=head+1$的元素(3)，而後將後面所有元素往前移一格，tail-1
+        
+        | index | -1/head |  0  | 1/tail |  2  |
+        | ----- |:-------:|:---:|:------:|:---:|
+        | value |    X    |  1  |   4    |     |
+
+#### Array版實作:
+```c=
+#include <stdio.h>
+#include <stdbool.h>
+
+#define QUEUE_LENGTH 5
+#define EMPTY (-1)
+#define INT_MIN (-2147483648)
+#define QUEUE_EMPTY INT_MIN
+
+int queue[QUEUE_LENGTH];
+int tail = -1;
+int head = -1;
+
+bool enqueue(int value){
+    if(tail >= QUEUE_LENGTH-1) return false;
+    tail++;
+    queue[tail] = value;
+    return true;
+}
+
+int dequeue(){
+    if(tail==EMPTY)
+        return QUEUE_EMPTY;
+    int result = queue[head+1];
+
+    //shift all of the element forword
+    for (int i = 1; i <= tail;i++){
+        queue[i - 1] = queue[i];
+    }
+    tail--;
+    return result;
+}
+
+int main(){
+    enqueue(1);
+    enqueue(4);
+    enqueue(3);
+
+    int t;
+    while((t=dequeue())!=QUEUE_EMPTY){
+        printf("t = %d\n", t);
+    }
+    return 0;
+}
+```
+code:https://github.com/coherent17/C-data-structure/blob/main/Queue/queue_array.c
+
+編譯執行後可以發現這個queue dequeue出來的順序真的是FIFO，輸出為: ![](https://i.imgur.com/bqwMjbi.png)
+
+### Linkedlist版:
+若是使用linkedlist來實作queue的話，需要使用兩個指標變數去追蹤queue的head及tail，
+
+#### enqueue():
+在做enqueue的時候需要先宣告一個記憶體空間，而後隨著新進來的元素去更新tail  
+
+*    一開始初始化head = NULL, tail = NULL
+*    宣告一個newnode1, 並設定newnode1->next = NULL
+*    將head及tail更新為newnode1
+  
+所以linkedlist變為:   
+
+*    head = newnode1, tail = newnode1, newnode1->next = NULL
+*    
+    | newnode1  | NULL |
+    | --------- |:----:|
+    | head tail |      |
+
+再enqueue一個node:  
+*    newnode2->next = NULL
+*    tail->next = newnode2
+*    tail = newnode2
+*    
+    | newnode1 | newnode2 | NULL |
+    |:--------:|:--------:|:----:|
+    |   head   |   tail   |      |
+
+再enqueue一個node:  
+*    newnode3->next = NULL
+*    tail->next = newnode3
+*    tail = newnode3
+*    
+    | newnode1 | newnode2 | newnode3 | NULL |
+    |:--------:|:--------:|:--------:|:----:|
+    |   head   |          |   tail   |      |
+
+可以特別注意到最早進來的newnode1是被放在head端，而較晚進來的newnode3的則是被放在tail端，與stack相反。
+
+#### dequeue():
+因為head是存放最早進來的node的位址，因此在dequeue的時候就直接將其位址指向的數值返還，而後將head改為該節點原本所指向的記憶體位址即可。
+
+#### Linkedlist版實作:
+```c=
+#include <stdio.h>
+#include <stdbool.h>
+#include <stdlib.h>
+
+#define EMPTY (-1)
+#define INT_MIN (-2147483648)
+#define QUEUE_EMPTY INT_MIN
+
+typedef struct node{
+    int value;
+    struct node *next;
+} node;
+
+node *head = NULL;
+node *tail = NULL;
+
+bool enqueue(int value){
+    node *newnode = malloc(sizeof(node));
+    newnode->value = value;
+    newnode->next = NULL;
+
+    //the first element add into the queue
+    if(head == NULL && tail == NULL){
+        head = newnode;
+        tail = newnode;
+    }
+
+    //add the seoond or third node into the queue
+    else{
+        tail->next = newnode;
+        tail = newnode;
+    }
+    return true;
+}
+
+int dequeue(){
+
+    //check if the queue is empty
+    if(head==NULL)
+        return QUEUE_EMPTY;
+
+    int result = head->value;
+    node *temp = head;
+    head = head->next;
+    if(head==NULL){
+        tail = NULL;
+    }
+    free(temp);
+    return result;
+}
+
+int main(){
+    enqueue(3);
+    enqueue(6);
+    enqueue(5);
+
+    int t;
+    while((t=dequeue())!=QUEUE_EMPTY){
+        printf("t = %d\n", t);
+    }
+    return 0;
+}
+```
+code:https://github.com/coherent17/C-data-structure/blob/main/Queue/queue_linkedlist.c
+
+### 優化改良版:
+由上面的兩隻程式皆可以發現都enqueue及dequeue的功能僅限於全域的array或是linkedlist，若有多個queue，應該要多出能夠指定針對哪一個queue進行enqueue或是dequeue的功能，因此需要再多傳一些參數進入enqueue及dequeue的function內部，使其可以更好的針對"特定的"queue進行動作。解決方法與stack的解決方法大同小異，對於array版，同樣也是包裝成struct，傳入位址即可解決，對於linkedlist版，將head及tail包裝好，傳入這個struct的位址，便能夠針對特定的queue進行enqueue及dequeue的動作了。
+
+#### Array_optimal實作:
+```c=
+#include <stdio.h>
+#include <stdbool.h>
+
+#define QUEUE_LENGTH 5
+#define EMPTY (-1)
+#define INT_MIN (-2147483648)
+#define QUEUE_EMPTY INT_MIN
+
+
+typedef struct queue{
+    int value[QUEUE_LENGTH];
+    //initialize each head and tail in main
+    int tail;
+    int head;
+} queue;
+
+void init_queue(queue *q){
+    q->head = EMPTY;
+    q->tail = EMPTY;
+}
+
+bool enqueue(queue *q, int value){
+    if(q->tail >= QUEUE_LENGTH-1) return false;
+    q->tail++;
+    q->value[q->tail] = value;
+    return true;
+}
+
+int dequeue(queue *q){
+    if(q->tail==EMPTY)
+        return QUEUE_EMPTY;
+    int result = q->value[q->head+1];
+
+    //shift all of the element forword
+    for (int i = 1; i <= q->tail;i++){
+        q->value[i - 1] = q->value[i];
+    }
+    q->tail--;
+    return result;
+}
+
+int main(){
+
+    queue q1, q2, q3;
+    init_queue(&q1);
+    init_queue(&q2);
+    init_queue(&q3);
+
+    enqueue(&q1, 15);
+    enqueue(&q1, 16);
+    enqueue(&q1, 29);
+    
+    enqueue(&q2, 46);
+    enqueue(&q2, 23);
+    enqueue(&q2, 49);
+
+    enqueue(&q3, 23);
+    enqueue(&q3, 21);
+    enqueue(&q3, 27);
+
+    int t;
+    while((t=dequeue(&q2))!=QUEUE_EMPTY){
+        printf("t = %d\n", t);
+    }
+    return 0;
+}
+```
+code:https://github.com/coherent17/C-data-structure/blob/main/Queue/queue_array_optimal.c
+
+#### Linkedlist_optimal實作:
+```c=
+#include <stdio.h>
+#include <stdbool.h>
+#include <stdlib.h>
+
+#define EMPTY (-1)
+#define INT_MIN (-2147483648)
+#define QUEUE_EMPTY INT_MIN
+
+typedef struct node{
+    int value;
+    struct node *next;
+} node;
+
+typedef struct queue{
+    //initialize in main
+    node *head;
+    node *tail;
+} queue;
+
+void init_queue(queue *q){
+    q->head = NULL;
+    q->tail = NULL;
+}
+
+bool enqueue(queue *q, int value){
+    node *newnode = malloc(sizeof(node));
+    newnode->value = value;
+    newnode->next = NULL;
+
+    //the first element add into the queue
+    if(q->head == NULL && q->tail == NULL){
+        q->head = newnode;
+        q->tail = newnode;
+    }
+
+    else{
+        q->tail->next = newnode;
+        q->tail = newnode;
+    }
+    return true;
+}
+
+int dequeue(queue *q){
+
+    //check if the queue is empty
+    if(q->head==NULL)
+        return QUEUE_EMPTY;
+
+    int result = q->head->value;
+    node *temp = q->head;
+    q->head = q->head->next;
+    if(q->head==NULL){
+        q->tail = NULL;
+    }
+    free(temp);
+    return result;
+}
+
+int main(){
+
+    queue q1, q2, q3;
+    init_queue(&q1);
+    init_queue(&q2);
+    init_queue(&q3);
+
+    enqueue(&q1, 15);
+    enqueue(&q1, 16);
+    enqueue(&q1, 29);
+    
+    enqueue(&q2, 46);
+    enqueue(&q2, 23);
+    enqueue(&q2, 49);
+
+    enqueue(&q3, 23);
+    enqueue(&q3, 21);
+    enqueue(&q3, 27);
+
+    int t;
+    while((t=dequeue(&q2))!=QUEUE_EMPTY){
+        printf("t = %d\n", t);
+    }
+    return 0;
+}
+```
+code:https://github.com/coherent17/C-data-structure/blob/main/Queue/queue_linkedlist_optimal.c
 
 ## 連結串列(Linked list):
 
