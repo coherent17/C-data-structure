@@ -17,14 +17,14 @@ node *createNode(int value){
 }
 
 /*
-since we need to change the root address in every recursive state
-therefore, passing the pointer to root to change the address
+if the root of the tree is point to NULL, then we need to change the value of the root
+therefore, we pass the double pointer to change the value of root
 */
 bool insertNumber(node **rootptr, int value){
-    node *root = *rootptr;
+    node *root = (*rootptr);
 
-    //empty tree, the first element to build the tree
     if(root==NULL){
+        //the reason why we pass double pointer in the argument
         (*rootptr)=createNode(value);
         return true;
     }
