@@ -2,7 +2,8 @@
 ---
 *    堆疊(Stack)
 *    佇列(Queue)
-*    連結串列(Linked list)
+*    連結串列(Linke送一隻傳˙d list)
+*    樹(Tree)
 *    雜湊表(Hash table)
 
 **目錄:**
@@ -640,6 +641,465 @@ int main(){
 }
 ```
 code:https://github.com/coherent17/C-data-structure/blob/main/Queue/queue_linkedlist_optimal.c
+
+## 樹(Tree):
+樹是一種非線性的資料結構，要在linkedlist或是array中尋找資料，從頭到尾整個找一次將會非常的耗費時間，若是使用tree的這種資料結構將能夠解決這種問題。若是未來在處理有層級的資料可以試著使用樹這個資料結構，或許能夠增快效率。
+
+### 二元樹(binary tree):
+對於這棵樹的任一節點，最多只有兩個分支。因此不像linkedlist僅需要去存放下一個節點的記憶體位址即可，需要兩個指標變數去存放左邊的分支與右邊的分支，而這棵樹內部可以依照需求放置不同的東西，可以放linkedlist,hash table, int, float, array，各種不一樣的元素都可以，這裡為求簡便先放置簡單的整數int來記錄。
+
+#### 宣告節點:
+因為需要去存放兩個分支的記憶體位置及該節點的數值，因此對於這種樹節點的宣告如下:
+```c=
+typedef struct node{
+    int value;
+    struct node *left;
+    struct node *right;
+} node;
+```
+可以看到對於這個節點的結構，我宣告了兩個指標變數以存取左右分支的節點位址。
+
+#### 新增節點:
+先初始化左右分之的節點都為NULL，在main中再串接，並返還該新節點的位址
+```c=
+node *createNode(int value){
+    node *newnode = malloc(sizeof(node));
+    newnode->value = value;
+    newnode->left = NULL;
+    newnode->right = NULL;
+    return newnode;
+}
+```
+
+#### 串接節點:
+在main中新增節點，並且將他們串接起來。
+```c=
+    node *node1 = createNode(5);
+    node *node2 = createNode(6);
+    node *node3 = createNode(7);
+    node *node4 = createNode(8);
+    node *node5 = createNode(9);
+
+    node1->left = node2;
+    node1->right = node3;
+    node3->left = node4;
+    node3->right = node5;
+```
+
+```
+                                5
+                               / \
+                              6   7
+                             / \ / \
+                            x  x 8  9
+```
+
+#### 印出樹(以tab分層級):
+希望能夠給予樹的根部，而後由左到右，由根部往葉子(Preorder)，先拜訪父節點再拜訪左右節點的方法將樹印出來，並且每往下一個層級多印一個tab鍵。
+```c=
+void printTabs(int numtabs){
+    for (int i = 0; i < numtabs;i++){
+        printf("\t");
+    }
+}
+
+void printTreeRecursive(node *root, int level){
+    if(root==NULL){
+        printTabs(level);
+        printf("---<empty>---\n");
+        return;
+    }
+
+    printTabs(level);
+    printf("value = %d\n", root->value);
+
+    //recursive to print the branch of tree
+
+    printTabs(level);
+    printf("left\n");
+    printTreeRecursive(root->left, level+1);
+
+    printTabs(level);
+    printf("right\n");
+    printTreeRecursive(root->right, level+1);
+    
+    printTabs(level);
+    printf("Done\n");
+}
+
+void printTree(node *root){
+    printTreeRecursive(root, 0);
+}
+```
+結果看起來像這樣:
+```
+value = 5
+left
+        value = 6
+        left
+                ---<empty>---
+        right
+                ---<empty>---
+        Done
+right
+        value = 7
+        left
+                value = 8
+                left
+                        ---<empty>---
+                right
+                        ---<empty>---
+                Done
+        right
+                value = 9
+                left
+                        ---<empty>---
+                right
+                        ---<empty>---
+                Done
+        Done
+Done
+```
+從這邊已經可以大概看出樹的層級，那接下來來試著用樹來做搜尋吧。
+
+#### binary tree:
+```c=
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct node{
+    int value;
+    struct node *left;
+    struct node *right;
+} node;
+
+node *createNode(int value){
+    node *newnode = malloc(sizeof(node));
+    newnode->value = value;
+    newnode->left = NULL;
+    newnode->right = NULL;
+    return newnode;
+}
+
+void printTabs(int numtabs){
+    for (int i = 0; i < numtabs;i++){
+        printf("\t");
+    }
+}
+
+void printTreeRecursive(node *root, int level){
+    if(root==NULL){
+        printTabs(level);
+        printf("---<empty>---\n");
+        return;
+    }
+
+    printTabs(level);
+    printf("value = %d\n", root->value);
+
+    //recursive to print the branch of tree
+
+    printTabs(level);
+    printf("left\n");
+    printTreeRecursive(root->left, level+1);
+
+    printTabs(level);
+    printf("right\n");
+    printTreeRecursive(root->right, level+1);
+    
+    printTabs(level);
+    printf("Done\n");
+}
+
+void printTree(node *root){
+    printTreeRecursive(root, 0);
+}
+
+int main(){
+
+    node *node1 = createNode(5);
+    node *node2 = createNode(6);
+    node *node3 = createNode(7);
+    node *node4 = createNode(8);
+    node *node5 = createNode(9);
+
+    node1->left = node2;
+    node1->right = node3;
+    node3->left = node4;
+    node3->right = node5;
+
+    printTree(node1);
+
+    free(node1);
+    free(node2);
+    free(node3);
+    free(node4);
+    free(node5);
+
+    return 0;
+}
+```
+code: https://github.com/coherent17/C-data-structure/blob/main/Tree/basicTree.c
+
+### 二元搜尋樹(binary search tree):
+二元搜尋樹是一種便於搜尋的資料結構，對於任意節點而言，比該節點的父節點小的數值，將會被分配在該父節點左邊的分支，而比父節點大的數值，將會被分配在右邊的分支，透過這種分配的方法，能夠使我們在這種樹中搜尋元素只要依照大小便能夠去查找該元素是否在樹中。
+
+#### 在二元搜尋樹中新增新元素:
+來寫一個function能夠傳入樹的根部，而後能夠按照二元搜尋樹的規則將樹建立起來。所以在這個function會需要傳入的argument有根部節點的位址及要新增的數值，但是在一開始還沒新增任何元素進入樹的時候，根部這個指標不是指向一個新的節點而是被初始化指向NULL，而後我們會需要去更改這個根部指標將其改為存放新第一個被加入二元搜尋樹的節點的位址，因此一開始傳入根部行不通的，應該要傳入一個double pointer，指向根部，並且使用$"*"$去dereference，以將根這個指標變數從NULL改為存放某一節點的記憶體位址。在實作上，則是透過遞迴的方式，透過與父節點比大小，而將其分配到左邊的分支，或是右邊的分支。
+
+```c=
+bool insertNumber(node **rootptr, int value){
+    node *root = (*rootptr);
+
+    if(root==NULL){
+        //the reason why we pass double pointer in the argument
+        (*rootptr)=createNode(value);
+        return true;
+    }
+
+    //if the element had been in the tree
+    if(root->value==value){
+        //do nothing
+        return false;
+    }
+
+    //recursive to insert the number into tree
+    else{
+        if(value < root->value)
+            return insertNumber(&(root->left), value);
+        else
+            return insertNumber(&(root->right), value);
+    }
+}
+```
+
+#### 在二元搜尋樹中尋找元素:
+因為每次的比較都是分一半去搜尋，因此時間複雜度為$O(log(N))$，相比其他的資料結構，在搜尋演算法上效率高了不少。因為在做搜尋的時候並不會去更動到樹內部的數值，因此僅需要將根部節點的位址及要搜索的數值傳入即可，同樣也適用遞迴的方式去尋找該元素是否在這個樹中。
+
+```c=
+bool findNumber(node *root, int value){
+    if(root==NULL)
+        return false;
+    if(root->value==value)
+        return true;
+    else{
+        if(value < root->value)
+            return findNumber(root->left, value);
+        else
+            return findNumber(root->right, value);
+    }
+}
+```
+
+#### binary search tree:
+```c=
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+
+typedef struct node{
+    int value;
+    struct node *left;
+    struct node *right;
+} node;
+
+node *createNode(int value){
+    node *newnode = malloc(sizeof(node));
+    newnode->value = value;
+    newnode->left = NULL;
+    newnode->right = NULL;
+    return newnode;
+}
+
+/*
+if the root of the tree is point to NULL, then we need to change the value of the root
+therefore, we pass the double pointer to change the value of root
+*/
+bool insertNumber(node **rootptr, int value){
+    node *root = (*rootptr);
+
+    if(root==NULL){
+        //the reason why we pass double pointer in the argument
+        (*rootptr)=createNode(value);
+        return true;
+    }
+
+    //if the element had been in the tree
+    if(root->value==value){
+        //do nothing
+        return false;
+    }
+
+    //recursive to insert the number into tree
+    else{
+        if(value < root->value)
+            return insertNumber(&(root->left), value);
+        else
+            return insertNumber(&(root->right), value);
+    }
+}
+
+bool findNumber(node *root, int value){
+    if(root==NULL)
+        return false;
+    if(root->value==value)
+        return true;
+    else{
+        if(value < root->value)
+            return findNumber(root->left, value);
+        else
+            return findNumber(root->right, value);
+    }
+}
+
+void printTabs(int numtabs){
+    for (int i = 0; i < numtabs;i++){
+        printf("\t");
+    }
+}
+
+void printTreeRecursive(node *root, int level){
+    if(root==NULL){
+        printTabs(level);
+        printf("---<empty>---\n");
+        return;
+    }
+
+    printTabs(level);
+    printf("value = %d\n", root->value);
+
+    //recursive to print the branch of tree
+
+    printTabs(level);
+    printf("left\n");
+    printTreeRecursive(root->left, level+1);
+
+    printTabs(level);
+    printf("right\n");
+    printTreeRecursive(root->right, level+1);
+    
+    printTabs(level);
+    printf("Done\n");
+}
+
+void printTree(node *root){
+    printTreeRecursive(root, 0);
+}
+
+int main(){
+
+    node *root=NULL;
+
+    insertNumber(&root, 85);
+    insertNumber(&root, 100);
+    insertNumber(&root, 26);
+    insertNumber(&root, 71);
+    insertNumber(&root, 1);
+    insertNumber(&root, 4);
+    insertNumber(&root, 3);
+    insertNumber(&root, 2);
+    insertNumber(&root, 5);
+    insertNumber(&root, 16);
+    insertNumber(&root, 24);
+    insertNumber(&root, 8);
+    insertNumber(&root, 96);
+    insertNumber(&root, 17);
+
+    printTree(root);
+
+    printf("%d (%d)\n", 17, findNumber(root, 17));
+    printf("%d (%d)\n", 4, findNumber(root, 4));
+    printf("%d (%d)\n", 24, findNumber(root, 24));
+    printf("%d (%d)\n", 98, findNumber(root,98));
+    printf("%d (%d)\n",13, findNumber(root, 13));
+    printf("%d (%d)\n", 25, findNumber(root, 25));
+
+
+    return 0;
+}
+```
+code:https://github.com/coherent17/C-data-structure/blob/main/Tree/binarySearchTree.c
+
+結果:
+```
+value = 85
+left
+        value = 26
+        left
+                value = 1
+                left
+                        ---<empty>---
+                right
+                        value = 4
+                        left
+                                value = 3
+                                left
+                                        value = 2
+                                        left
+                                                ---<empty>---
+                                        right
+                                                ---<empty>---
+                                        Done
+                                right
+                                        ---<empty>---
+                                Done
+                        right
+                                value = 5
+                                left
+                                        ---<empty>---
+                                right
+                                        value = 16
+                                        left
+                                                value = 8
+                                                left
+                                                        ---<empty>---
+                                                right
+                                                        ---<empty>---
+                                                Done
+                                        right
+                                                value = 24
+                                                left
+                                                        value = 17
+                                                        left
+                                                                ---<empty>---
+                                                        right
+                                                                ---<empty>---
+                                                        Done
+                                                right
+                                                        ---<empty>---
+                                                Done
+                                        Done
+                                Done
+                        Done
+                Done
+        right
+                value = 71
+                left
+                        ---<empty>---
+                right
+                        ---<empty>---
+                Done
+        Done
+right
+        value = 100
+        left
+                value = 96
+                left
+                        ---<empty>---
+                right
+                        ---<empty>---
+                Done
+        right
+                ---<empty>---
+        Done
+Done
+17 (1)
+4 (1)
+24 (1)
+98 (0)
+13 (0)
+25 (0)
+```
 
 ## 連結串列(Linked list):
 
@@ -1916,7 +2376,14 @@ int main(){
 #### **Solution I: linear probing**
 另外，我們可以看到其實$hash\_table$還有部分空間沒有填滿，何不利用這些位置放置那些尚未被放入的$person$呢?若該名字經過$hash\ function$之後所得到的位址已經被別人所佔據，則我們直接檢查隔壁的位址是否被佔據，一直檢查隔壁的，直到找到空的記憶體位址可以插入該$person$。但是有可能找遍了整個$hash\_table$發現全部都被填滿了，那就沒辦法了。
 
-這邊特別定義一個位址讓被刪除過後的pointer指向他，與尚未被放置過$person$位址的NULL有所區別:
+這邊特別定義一個位址讓被刪除過後的pointer指向他，與尚未被放置過$person$位址的NULL有所區別:  
+example: 若hash("d")=2，但在$index=2$的地方已經被c所佔據，且c被刪除過，此時記憶體位置會被紀錄為(0xFFFFFUL)所以d可能會出現在2以外的位子。但是當遇到NULL的話，表示d一定不會出現在$hash\_table$裡面。
+```bash=
+0 -> a
+1 -> b
+2 -> (0XFFFFFUL)
+3 -> d
+```
 ```c=
 //define address of the pointer if the element has been deleted
 #define DELETED_NODE (person *)(0xFFFFFUL) 
@@ -2112,3 +2579,154 @@ $\qquad\qquad\qquad\qquad\qquad\qquad$![](https://i.imgur.com/fKpr4T3.png)
 *    若$hash\ function$產生的$index$不夠隨機，那使用這種方法效率極差
 
 #### **Solution II: external chain**
+為了要解決$hash\ function$ $hash$到同一個$index$的問題，我們可以將其改為$linkedlist$以解決這個問題，從頭部新增該節點。因為$hash\_table$為指標陣列，可以將其內部所有的指標當成$linkedlist$的起始點，若$hash$到同一個$index$則串接該$index$上的$linkedlist$。
+```c=
+#include <stdio.h>
+#include <string.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#define MAX_NAME 256
+#define TABLE_SIZE 10
+
+typedef struct person{
+    char name[MAX_NAME];
+    int age;
+    struct person *next;
+}person;
+
+person *hash_table[TABLE_SIZE];
+
+//define the hash function
+unsigned int hash(char *name){
+    int length=strnlen(name, MAX_NAME);
+    unsigned int hash_value=0;
+    for(int i=0;i<length;i++){
+        hash_value+=name[i];
+        hash_value=(hash_value*name[i])%TABLE_SIZE;
+    }
+    return hash_value;
+}
+
+//initialize the hash table to NULL (let it be empty)
+void init_hash_table(){
+    for(int i=0;i<TABLE_SIZE;i++){
+        hash_table[i]=NULL;
+    }
+}
+
+//print out the hash table
+void print_table(){
+    printf("---Start---\n");
+    for(int i=0;i<TABLE_SIZE;i++){
+        //nothing in the hash table
+        if(hash_table[i]==NULL)
+            printf("\t%d\t---\n",i);
+
+        else{
+            printf("\t%d\t",i);
+            person *temp = hash_table[i];
+            while(temp!=NULL){
+                printf("%s - ", temp->name);
+                temp = temp->next;
+            }
+            printf("\n");
+        }
+    }
+    printf("---End-----\n");
+}
+
+//insert the element into the hash_table
+bool hash_table_insert(person *p){
+    //calculate the index by hash_function
+    int index=hash(p->name);
+    
+    //insert the person as the head node of the chain
+    person *newperson = malloc(sizeof(person));
+    strcpy(newperson->name, p->name);
+    newperson->age = p->age;
+    newperson->next = NULL;
+    newperson->next = hash_table[index];
+    hash_table[index] = newperson;
+    return true;
+}
+
+//want to look up whether the person is in hash_table
+//if not, return null, if yes, return the pointer to the person
+person *hash_table_lookup(char *name){
+    int index=hash(name);
+    person *temp = hash_table[index];
+    while(temp!=NULL && strncmp(temp->name, name, MAX_NAME)!=0){
+        temp = temp->next;
+    }
+    return temp;
+}
+
+//want to delete the person in the hash_table
+//if delete, return the address of that guy, and free the address in main
+void hash_table_delete(char *name){
+    int index=hash(name);
+    person *temp = hash_table[index];
+    person *prev = NULL;
+    while(temp!=NULL && strncmp(temp->name, name, MAX_NAME)!=0){
+        prev = temp;
+        temp = temp->next;
+    }
+    //delete head pointer
+    if(prev==NULL)
+        hash_table[index] = hash_table[index]->next;
+    else{
+        prev->next = temp->next;
+    }
+    free(temp);
+}
+
+int main(){
+
+    init_hash_table();
+
+    //hash function calculate
+    printf("Walt -> %u\n",hash("Walt"));
+    printf("Skyler -> %u\n",hash("Skyler"));
+    printf("Saul -> %u\n",hash("Saul"));
+    printf("Mike -> %u\n",hash("Mike"));
+    printf("Hank -> %u\n",hash("Hank"));
+    printf("Mary -> %u\n",hash("Mary"));
+    printf("Holy -> %u\n",hash("Holy"));
+    printf("Jessie -> %u\n",hash("Jessie"));
+    printf("Todd -> %u\n",hash("Todd"));
+
+
+    person Walt={.name="Walt",.age=26};
+    person Skyler={.name="Skyler",.age=27};
+    person Saul={.name="Saul",.age=28};
+    person Mike={.name="Mike",.age=29};
+    person Hank={.name="Hank",.age=30};
+    person Mary={.name="Mary",.age=31};
+    person Holy={.name="Holy",.age=32};
+    person Jessie={.name="Jessie",.age=33};
+    person Todd={.name="Todd",.age=34};
+
+    
+    //add person into hash_table
+    hash_table_insert(&Walt);
+    hash_table_insert(&Skyler);
+    hash_table_insert(&Saul);
+    hash_table_insert(&Mike);
+    hash_table_insert(&Hank);
+    hash_table_insert(&Mary);
+    hash_table_insert(&Holy);
+    hash_table_insert(&Jessie);
+    hash_table_insert(&Todd);
+
+    print_table();
+
+    hash_table_delete("Saul");
+    hash_table_delete("Holy");
+    hash_table_delete("Mike");
+
+    print_table();
+    return 0;
+}
+```
+code: https://github.com/coherent17/C-data-structure/blob/main/Hash%20Table/hashtable_external_chain.c
+
