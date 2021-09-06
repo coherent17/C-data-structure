@@ -2,7 +2,7 @@
 ---
 *    堆疊(Stack)
 *    佇列(Queue)
-*    連結串列(Linke送一隻傳˙d list)
+*    鏈接串列(Linkedlist)
 *    樹(Tree)
 *    雜湊表(Hash table)
 
@@ -642,6 +642,7 @@ int main(){
 ```
 code:https://github.com/coherent17/C-data-structure/blob/main/Queue/queue_linkedlist_optimal.c
 
+
 ## 樹(Tree):
 樹是一種非線性的資料結構，要在linkedlist或是array中尋找資料，從頭到尾整個找一次將會非常的耗費時間，若是使用tree的這種資料結構將能夠解決這種問題。若是未來在處理有層級的資料可以試著使用樹這個資料結構，或許能夠增快效率。
 
@@ -1101,7 +1102,7 @@ Done
 25 (0)
 ```
 
-## 連結串列(Linked list):
+## 鏈接串列(Linked list):
 
 ### Why linked list?
 若現在有一個陣列如下:
@@ -2064,6 +2065,251 @@ int main(){
 }
 ```
 完整的程式碼(C code):https://github.com/coherent17/C-data-structure/blob/main/Linked%20List/personal_data_linkedlist_project.c
+
+### 雙向鏈接串列:
+對於上面所提到的linkedlist在使用上的方向僅能往下一個節點的單向式操作，倘若想要回推的話是不太方便的，因此在雙向鏈接串列中便再多加了一個指標變數去紀錄前一個節點的位址，因此這個linkedlist便可以雙向的操作了，但是缺點是，對於每一個節點都會多花一個指標變數的記憶體去存放位址。
+
+#### 節點結構:
+因為對於每一個節點都要多存放一個往前的指標，因此定義節點為:
+```c=
+typedef struct node{
+    int value;
+    struct node *next;
+    struct node *prev;
+} node;
+```
+因為對於每一個節點都會多一個指標要去指向前一個節點，因此對於整個CODE而言會複雜許多，並且也不好維護，更會相比單向的linkedlist耗費更多的記憶體，但是若是在刪除節點時有多一個指標變數去告知前一個節點的位址，那麼在串接節點上將會方便許多。
+
+#### 產生節點:
+產生節點並且先將struct內部的兩個指標都先初始化為NULL，直到要插入linkedlist時，再改變其指向的位址。
+```c=
+node *create_new_node(int value){
+    node *newnode = malloc(sizeof(node));
+    newnode->value = value;
+    newnode->prev = NULL;
+    newnode->next = NULL;
+    return newnode;
+}
+```
+
+#### 從頭部新增節點:
+因為從頭部新增節點，會去改變到head的值，因此傳入double pointer以更改head的值。來做個表格看看這個function是如何運作的:
+
+| NULL |
+| ---- |
+| head |
+
+**插入node1:**
+
+node1->next = *head;
+
+|    NULL     | node1 |        NULL         |
+|:-----------:|:-----:|:-------------------:|
+| node1->prev |       | node1->next/(*head) |
+
+*head = node1;
+
+|    NULL     | node1 |    NULL     |
+|:-----------:|:-----:|:-----------:|
+| node1->prev | *head  | node1->next |
+
+**插入node2:**
+
+node2->next = *head;
+
+|    NULL     | node2 | node1 |    NULL     |
+|:-----------:|:-----:|:-----:|:-----------:|
+| node1->prev |       | *head  | node1->next |
+
+(*head)->prev = node2;
+
+|           node2           | node1 |    NULL     |
+|:-------------------------:|:-----:|:-----------:|
+| (*head)->prev/(node1->prev) | *head | node1->next |
+
+(*head) = node2;
+
+|         node2         | node1 |    NULL     |
+|:---------------------:|:-----:|:-----------:|
+| (*head)/(node1->prev) |       | node1->next |
+
+```c=
+void insert_at_head(node **head, node *newnode){
+    newnode->next = *head;
+    if((*head)!=NULL){
+        (*head)->prev = newnode;
+    }
+    *head = newnode;
+}
+```
+
+#### 刪除節點:
+接下來試著用double linkedlist來實作移除特定的節點:  
+假設現在的linkedlist為:  
+
+| node1 | node2 | node3 | node4 | node5 |
+| ----- | ----- |:-----:| ----- |:-----:|
+| *head  |       |       |       |       |
+
+假如被移除的節點為node1，為該linkedlist的*head，則將*head改指向node1的下一個節點也就是node2，而後將node2->prev改為NULL，最後將node整個釋放掉。
+
+|     NULL      | node2 | node3 | node4 | node5 |
+|:-------------:| ----- |:-----:| ----- |:-----:|
+| (*head)->prev | *head |       |       |       |
+
+接著再繼續移除node3，步驟為先將該節點的前一個節點與該節點的下一個節點連結(node2->next = node4)，而後再將node4->prev更新為node2，最後釋放node3。
+
+| node2 | node4 | node5 |
+| ----- | ----- |:-----:|
+| *head |       |       |
+
+接著繼續移除node5，為該linkedlist的最後一個節點，因此在將node4與node5的下一個節點(NULL)連結後，便結束了。
+
+```c=
+void remove_node(node **head, node *node_to_remove){
+    if(node_to_remove==NULL)
+        return;
+    //the node to remove is head node
+    if(*head==node_to_remove){
+        *head = node_to_remove->next;
+        (*head)->prev = NULL;
+    }
+    //the node to remove is not a head node 
+    else{
+        node_to_remove->prev->next = node_to_remove->next;
+        //the node to remove is not the tail node
+        if(node_to_remove->next!=NULL){
+            node_to_remove->next->prev = node_to_remove->prev;
+        }
+    }
+    node_to_remove->next = NULL;
+    node_to_remove->prev = NULL;
+    free(node_to_remove);
+}
+```
+
+#### driven code:
+```c=
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct node{
+    int value;
+    struct node *next;
+    struct node *prev;
+} node;
+
+void printList(node *head){
+    node *temp = head;
+    while(temp!=NULL){
+        printf("%d - ", temp->value);
+        temp = temp->next;
+    }
+    printf("\n");
+}
+
+node *create_new_node(int value){
+    node *newnode = malloc(sizeof(node));
+    newnode->value = value;
+    newnode->prev = NULL;
+    newnode->next = NULL;
+    return newnode;
+}
+
+void insert_at_head(node **head, node *newnode){
+    newnode->next = *head;
+    if((*head)!=NULL){
+        (*head)->prev = newnode;
+    }
+    *head = newnode;
+}
+
+void remove_node(node **head, node *node_to_remove){
+    if(node_to_remove==NULL)
+        return;
+    //the node to remove is head node
+    if(*head==node_to_remove){
+        *head = node_to_remove->next;
+        (*head)->prev = NULL;
+    }
+    //the node to remove is not a head node 
+    else{
+        node_to_remove->prev->next = node_to_remove->next;
+        //the node to remove is not the tail node
+        if(node_to_remove->next!=NULL){
+            node_to_remove->next->prev = node_to_remove->prev;
+        }
+    }
+    node_to_remove->next = NULL;
+    node_to_remove->prev = NULL;
+    free(node_to_remove);
+}
+
+node *find_node(node *head, int value){
+    node *temp = head;
+    while(temp!=NULL){
+        if(temp->value == value)
+            return temp;
+        temp = temp->next;
+    }
+    return NULL;
+}
+
+int main(){
+    node *head=NULL;
+    node *temp;
+
+    for(int i=0;i<25;i++){
+        temp=create_new_node(i);
+        insert_at_head(&head,temp);
+    }
+
+    temp = find_node(head, 16);
+
+    //remove the element in the linkedlist
+    remove_node(&head, temp);
+
+    remove_node(&head, NULL);
+
+    //try to remove the head
+    remove_node(&head, head);
+
+    printList(head);
+    return 0;
+}
+```
+code:https://github.com/coherent17/C-data-structure/blob/main/Linked%20List/double_linkedlist.c
+
+#### 單向linkedlist移除節點技巧(已知節點位址):
+雖然double linkedlist可以走兩個方向來去方便的移除節點，但是在單向的linkedlist也有一個不錯的方法來刪除節點，只要知道欲刪除節點的位址，更不須知道該linkedlist的head為何，便可以刪除該節點。這個方法是在[Leetcode](https://leetcode.com/problems/delete-node-in-a-linked-list/)上學到的:將欲刪除節點的下一個節點的數值先複製一份到自己這邊，而後實際上是刪掉欲刪除節點的下一個節點。
+
+```bash=
+         ⬇(node)  
+-  1  -  2  -  3  -  4
+               ⬆(node->next)
+step 1:
+    change node->value to node->next->value
+             ⬇(node)  
+    -  1  -  3  -  3  -  4
+                   ⬆(node->next)
+step 2:
+    connect node->next as node->next->next, and disconnect the node->next
+             ⬇(node)  
+    -  1  -  3  -  4              3
+                                  ⬆(node->next)
+step 3:
+    free the memmory
+```
+
+```c=
+void deleteNode(struct ListNode *node){
+    struct ListNode *temp = node->next;
+    node->val = node->next->val;
+    node->next = temp->next;
+    temp->next = NULL;
+    free(temp);
+}
+```
 
 ## 雜湊表(Hash table):
 若要在陣列中搜尋該數值所對應的索引，以$linear\ search$的時間複雜度為$O(n)$，若是改用$binary\ search$則可以降至$O(logN)$，但是當$N$很大時，$O(logN)$仍然很可觀，因此可以用空間換取時間的$Hash\ Table$的方法，便可以將時間複雜度降至$O(1)$。
