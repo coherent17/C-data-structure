@@ -5,8 +5,8 @@
 #include <math.h>
 
 btree create_btree(int m){
-	if(m < BTREER_MIN_M){
-		m = BTREER_MIN_M;
+	if(m < BTREE_MIN_M){
+		m = BTREE_MIN_M;
 	}
 
 	btree result = {m, ceilf( (float)m / 2.0f) - 1, NULL};
@@ -18,6 +18,7 @@ void free_btree(btree *tree){
 	free_btreeNode(tree->root, *tree);
 }
 
+//allocate memory for the btree node
 btree_node *create_btreeNode(btree tree){
 	btree_node *newnode = malloc(sizeof(btree_node));
 	newnode->n = 0;
@@ -47,4 +48,35 @@ void free_btreeNode(btree_node *root, btree tree){
 		free(root->vals);
 		free(root);
 	}
+}
+
+//search method in btree
+void *btree_search(btree tree, int key){
+	int index;
+	btree_node *result = btree_node_search(tree.root, key, &index);
+
+	/*
+	//not found the key in the btree
+	if(result == NULL){
+		return NULL;
+	}
+	else return result->vals[index];
+	*/
+	return result ? result->vals[index] : NULL;
+}							
+
+btree_node *btree_node_search(btree_node *root, int key, int *index){
+	for(*index = 0; *index < root->n && key >= root->keys[*index]; i++){
+		//if find the key in this node
+		if(key == root->keys[*index]) return root;
+	}
+
+	/*
+	//if the node has children(internal node), traverse the children node
+	if(root ->number_of_children > 0) return btree_node_search(root->children[*index], key, index);
+	
+	//if not found the key in the btree return NULL
+	return NULL;
+	*/
+	return root -> number_of_children > 0 ? btree_node_search(root->children[*index], key, index) : NULL;
 }
