@@ -29,7 +29,7 @@ btree_node *create_btreeNode(btree tree){
 	return newnode;
 }
 
-btree_node *init_btreeNode(btree tree, int *key, void *vals){
+btree_node *init_btreeNode(btree tree, int key, void *val){
 	btree_node *newnode = create_btreeNode(tree);
 	newnode->keys[0] = key;
 	newnode->vals[0] = val;
@@ -79,4 +79,39 @@ btree_node *btree_node_search(btree_node *root, int key, int *index){
 	return NULL;
 	*/
 	return root -> number_of_children > 0 ? btree_node_search(root->children[*index], key, index) : NULL;
+}
+
+//move the key from the source node with specific index to the destination node with specific index
+void moveKeyValue(btree_node *inNode, int InIndex, btree_node *outNode, int OutIndex){
+	outNode->keys[OutIndex] = inNode->keys[InIndex];
+	outNode->vals[OutIndex] = inNode->vals[InIndex];
+}
+
+void btree_insert(btree *tree, int key, void *val){
+	//if the root node doesn't exist, create it!
+	if(tree->root == NULL){
+		tree->root = init_btreeNode(*tree, key, val);
+	}
+	else{
+		btree_node *newRoot = btree_node_insert(tree->root, *tree, key, val);	//if return the node that be upshifted, then you must update the root
+		if(newRoot != NULL) tree->root = newRoot;
+	}
+}
+
+btree_node *btree_node_spilt(btree_node *root, btree tree, btree_node *newnode, int newNodeindex){
+
+}
+
+btree_node *btree_node_insert(btree_node *root, btree tree, int key, void *val){
+	//using a while loop to find the place to insert
+	int i = 0;
+	while(i < root->n && key > root->keys[i]) i++;
+
+	//if there is a duplicate key, replace the original value with the new value
+	if(i < root->n && key == root->keys[i]){	//if i == root->n, violate the max degree of the node, we should spilt the node
+		root->vals[i] = val;
+		return NULL;	//since no upshift node exist, return NULL
+	}
+
+	//if we didn't find the key in this node 
 }

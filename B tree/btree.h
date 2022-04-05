@@ -24,11 +24,17 @@ void 	free_btree(btree *tree);
 
 //constructor and destructor for btreeNode
 btree_node *create_btreeNode(btree tree);						//allocate memory for the btree_node
-btree_node *init_btreeNode(btree tree, int key, void *vals);	//put the node information into btree_node
+btree_node *init_btreeNode(btree tree, int key, void *val);	//put the node information into btree_node
 void		free_btreeNode(btree_node *root, btree tree);
 
 //search method for the btree
 void *btree_search(btree tree, int key);								//return the val of the corresponding key
 btree_node *btree_node_search(btree_node *root, int key, int *index);	//return the target node address and the index of the key in that node 
+
+//insert method for the btree
+void btree_insert(btree *tree, int key, void *val);										//since the root node may change, pass in the pointer of the btree
+void moveKeyValue(btree_node *inNode, int InIndex, btree_node *outNode, int OutIndex);	//move the key from the source node with specific index to the destination node with specific index
+btree_node *btree_node_spilt(btree_node *root, btree tree, btree_node *newnode, int newNodeindex);
+btree_node *btree_node_insert(btree_node *root, btree tree, int key, void *val);		//if return the node that be upshifted, then you must update the root
 
 #endif
