@@ -9,7 +9,7 @@ all: $(BIN)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(BIN): main.c $(OBJS)
-	$(CC) $(CFLAGS) $^ -o $@
+	$(CC) $(CFLAGS) $^ -o $@ -lm
 
 do:
 	./Btree
