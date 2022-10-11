@@ -85,12 +85,53 @@ node *BST_predecessor(node *x){
     return y;
 }
 
-void BST_transplant(node *root, node *u, node *v){
-    
-}
-
 void BST_delete(node **rootptr, node *z){
+    if(z == NULL) return;
 
+    //case1 : no children on the delete node
+    if(z->left == NULL && z->right == NULL){
+        if(z != *rootptr){
+            //check whether z is the left/right child from parent
+            if(z->parent->left == z){
+                z->parent->left = NULL;
+            }
+            else{
+                z->parent->right = NULL;
+            }
+        }
+        else{
+            *rootptr = NULL;
+        }
+        free(z);
+    }
+
+    //case2 : two children on the delete node
+    else if(z->left && z->right){
+        node *z_successor = BST_successor(z);
+        int z_successor_key = z_successor->key;
+        
+        BST_delete(rootptr, z_successor);
+        z->key = z_successor_key;
+    }
+
+    //case3 : one child on the delete node
+    else{
+        node *child = (z->left) ? z->left : z->right;
+        child->parent = z->parent;
+
+        if(z != *rootptr){
+            if(z == z->parent->left){
+                z->parent->left = child;
+            }
+            else{
+                z->parent->right = child;
+            }
+        }
+        else{
+            *rootptr = child;
+        }
+        free(z);
+    }
 }
 
 void printNode(node *x){
@@ -147,4 +188,11 @@ void BST_inorder_tree_walk(node *root){
         printf("%d ", root->key);
         BST_inorder_tree_walk(root->right);
     }
+}
+
+void freeBST(node *root){
+    if(root == NULL) return;
+    freeBST(root->left);
+    freeBST(root->right);
+    free(root);
 }

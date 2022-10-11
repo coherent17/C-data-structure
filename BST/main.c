@@ -41,12 +41,26 @@ int main(){
     printNode(BST_predecessor(BST_min(root)));
     printf("\n");
 
-    //test for print tree
+    printTree(root);
+
+    printf("test for BST_delete\n");
+    //case 1:
+    BST_delete(&root, BST_search(root, 4));
+
+    //case 2:
+    BST_delete(&root, BST_search(root, 18));
+
+    //case 3:
+    BST_delete(&root, BST_search(root, 20));
+
+
     printTree(root);
 
     //inorder tree walk on BST to get sorted element
     BST_inorder_tree_walk(root);
     printf("\n");
 
+
+    freeBST(root);
     return 0;
 }

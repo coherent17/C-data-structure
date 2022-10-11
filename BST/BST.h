@@ -18,8 +18,9 @@ node *BST_min(node *root);
 node *BST_max(node *root);
 node *BST_successor(node *x);
 node *BST_predecessor(node *x);
+void BST_delete(node **rootptr, node *z);
 void printNode(node *x);
 void printTree(node *root);
 void BST_inorder_tree_walk(node *root);
-
+void freeBST(node *root);
 #endif
