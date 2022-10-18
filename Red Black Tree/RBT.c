@@ -89,7 +89,81 @@ void rb_right_rotate(rb_node **rootptr, rb_node *y){
 
 //maintain red-black property after rb_insert called
 void rb_insert_FixUp(rb_node **rootptr, rb_node *z){
-    
+    while(z != *rootptr && z->parent->color == RED){
+
+        if(z->parent == z->parent->parent->left){
+            rb_node *y = z->parent->parent->right;
+
+            //case1: if uncle is RED
+            //parent and uncle color change to BLACK
+            //grandparent color change to RED
+            //Moze z to grandparent
+            if(y->color == RED){
+                z->parent->color = BLACK;
+                y->color = BLACK;
+                z->parent->parent->color = RED;
+                z = z->parent->parent;
+            }
+
+            //uncle is BLACK:
+            else{
+
+                //case2: z is a right child
+                //Move z to parent
+                //left-rotate(z)
+                //turn into case 3
+                if(z == z->parent->right){
+                    z = z->parent;
+                    rb_left_rotate(rootptr, z);
+                }
+
+                //case3: z is a left child
+                //parent change to BLACK
+                //grandparent change to RED
+                //right-rotate(grandparent)
+                z->parent->color = BLACK;
+                z->parent->parent->color = RED;
+                rb_right_rotate(rootptr, z->parent->parent);
+            }
+        }
+
+        else{
+            rb_node *y = z->parent->parent->left;
+
+            //case1: if uncle is RED
+            //parent and uncle color change to BLACK
+            //grandparent color change to RED
+            //Moze z to grandparent
+            if(y->color == RED){
+                z->parent->color = BLACK;
+                y->color = BLACK;
+                z->parent->parent->color = RED;
+                z = z->parent->parent;
+            }
+
+            //uncle is BLACK:
+            else{
+                //case2: z is a left child
+                //Move z to parent
+                //right-rotate(z)
+                //turn into case 3
+                if(z == z->parent->left){
+                    z = z->parent;
+                    rb_right_rotate(rootptr, y);
+                }
+
+                //case3: z is a right child
+                //parent change to BLACK
+                //grandparent change to RED
+                //left-rotate(grandparent)
+                z->parent->color = BLACK;
+                z->parent->parent->color = RED;
+                rb_left_rotate(rootptr, z->parent->parent);
+
+            }
+        }
+    }
+    (*rootptr)->color = BLACK;
 }
 
 void rb_insert(rb_node **rootptr, int key){
