@@ -1,5 +1,6 @@
 #include "RBT.h"
 #include <stdlib.h>
+#include <stdio.h>
 
 rb_node *rb_newNode(int key){
     rb_node *newnode = malloc(sizeof(rb_node));
@@ -98,7 +99,7 @@ void rb_insert_FixUp(rb_node **rootptr, rb_node *z){
             //parent and uncle color change to BLACK
             //grandparent color change to RED
             //Moze z to grandparent
-            if(y->color == RED){
+            if(y && y->color == RED){
                 z->parent->color = BLACK;
                 y->color = BLACK;
                 z->parent->parent->color = RED;
@@ -134,7 +135,7 @@ void rb_insert_FixUp(rb_node **rootptr, rb_node *z){
             //parent and uncle color change to BLACK
             //grandparent color change to RED
             //Moze z to grandparent
-            if(y->color == RED){
+            if(y && y->color == RED){
                 z->parent->color = BLACK;
                 y->color = BLACK;
                 z->parent->parent->color = RED;
@@ -201,4 +202,58 @@ void rb_insert(rb_node **rootptr, int key){
 
     //call rb_insert_fixup to maintain red black tree property
     rb_insert_FixUp(rootptr, z);
+}
+
+void printTabs(int numtabs){
+    int i;
+    for (i = 0; i < numtabs;i++){
+        printf("\t");
+    }
+}
+
+void printTreeRecursive(rb_node *root, int level){
+    if(root==NULL){
+        printTabs(level);
+        printf("---<empty>---\n");
+        return;
+    }
+
+    printTabs(level);
+    printf("value = %d ", root->key);
+    if(root->parent){
+        printf("parent value = %d", root->parent->key);
+    }
+    printf("\n");
+
+    //recursive to print the branch of tree
+
+    printTabs(level);
+    printf("left\n");
+    printTreeRecursive(root->left, level+1);
+
+    printTabs(level);
+    printf("right\n");
+    printTreeRecursive(root->right, level+1);
+    
+    printTabs(level);
+    printf("Done\n");
+}
+
+void printTree(rb_node *root){
+    printf("\n\n");
+    printTreeRecursive(root, 0);
+}
+
+void inorder(rb_node *root){
+    if(!root) return;
+    inorder(root->left);
+    printf("%d ", root->key);
+    inorder(root->right);
+}
+
+void freeRBT(rb_node *root){
+    if(root == NULL) return;
+    freeRBT(root->left);
+    freeRBT(root->right);
+    free(root);
 }

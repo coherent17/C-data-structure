@@ -17,4 +17,8 @@ typedef struct _rb_node{
 }rb_node;
 
 
+void rb_insert(rb_node **rootptr, int key);
+void inorder(rb_node *root);
+void printTree(rb_node *root);
+void freeRBT(rb_node *root);
 #endif
