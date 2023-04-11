@@ -8,11 +8,11 @@ typedef struct entry{
     struct entry *next; //external chaining
 }entry;
 
-typedef struct _hash_table{
+struct _hash_table{
     uint32_t size;
     hashfunction *hash;
     entry **elements;   //array of pointers
-}hash_table;
+};
 
 //private function to get the index of the given key
 static size_t hash_table_index(hash_table *ht, const char *key){
@@ -30,6 +30,17 @@ hash_table *hash_table_create(uint32_t size, hashfunction *hf){
 }
 
 void hash_table_destroy(hash_table *ht){
+    //clean up individual elements
+    for(uint32_t i = 0; i < ht->size; i++){
+        while(ht->elements[i]){
+            entry *tmp = ht->elements[i];
+            ht->elements[i] = ht->elements[i]->next;
+            free(tmp->key);
+            free(tmp->obj);
+            free(tmp);
+        }
+    }
+
     free(ht->elements);
     free(ht);
 }
@@ -65,8 +76,11 @@ bool hash_table_insert(hash_table *ht, const char *key, void *obj){
     //create a new entry
     entry *e = malloc(sizeof(entry));
     e->obj = obj;
-    e->key = malloc(strlen(key) + 1);
-    strcpy(e->key, key);
+
+    // e->key = malloc(strlen(key) + 1);
+    // strcpy(e->key, key);
+    //can be replaced with:
+    e->key = strdup(key);
 
     //insert the entry
     e->next = ht->elements[index];
