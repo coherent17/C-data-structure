@@ -62,6 +62,6 @@ int main(int argc, char **argv){
     }
 
     printf("%u out of %u guesses were in the table\n", good_guesses, num_guesses);
-    hash_table_destroy(ht);
+    hash_table_destroy(table);
     return 0;
 }
